@@ -6,231 +6,414 @@
 <title>見積AIエージェント デモ</title>
 <style>
 :root{
-  --ink:#1f2328; --sub:#5f6670; --line:#e1e4ea; --bg:#f5f6f8; --white:#fff;
-  --brand:#5b5fc7; --brand-d:#4f52b2; --brand-l:#e8e8f7; --accent:#d2531e; --ok:#1a7f5a; --warn:#b26a00;
-  --sp:#036c70; --sp-l:#e4f2f2; --xl:#107c41;
+  --ink:#242424; --sub:#616161; --sub2:#8a8a8a; --line:#e0e0e0; --line2:#d1d1d1;
+  --bg:#f5f5f5; --rail:#ebebeb; --panel:#fafafa; --white:#fff;
+  --brand:#5b5fc7; --brand-h:#4f52b2; --brand-l:#e8ebfa; --brand-l2:#f3f4fc;
+  --sp:#03787c; --sp-d:#025b5e; --sp-l:#e6f3f3; --xl:#107c41; --xl-l:#e9f5ee; --pdf:#d13438;
+  --cs:#0f6cbd; --cs-l:#ebf3fc; --ok:#107c10; --warn:#bc4b09; --warn-l:#fdf3ea;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{font-family:"Hiragino Kaku Gothic ProN","BIZ UDGothic","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);font-size:14px;line-height:1.6}
-button{font:inherit;cursor:pointer}
-.notice{background:#fff7e6;border-bottom:1px solid #f1d39a;color:#6b4a00;font-size:12.5px;padding:6px 16px;text-align:center}
-.top{display:flex;align-items:center;gap:12px;background:#33344a;color:#fff;padding:0 16px;height:46px}
-.top .brand{font-weight:700;letter-spacing:.02em}
-.top .sub{font-size:12px;opacity:.75}
-.tabs{display:flex;gap:4px;margin-left:auto}
-.tab{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;padding:5px 12px;font-size:13px}
-.tab.on{background:#fff;color:#33344a;border-color:#fff;font-weight:700}
-.view{display:none;height:calc(100% - 46px - 31px)}
+body{font-family:"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI",Meiryo,sans-serif;color:var(--ink);background:var(--bg);font-size:14px;line-height:1.55;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;cursor:pointer}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+a{color:var(--brand-h);cursor:pointer;text-decoration:none} a:hover{text-decoration:underline}
+
+/* ---- デモの操作バー（製品の画面の外） ---- */
+.demobar{display:flex;align-items:center;gap:14px;padding:7px 14px;background:#1b1a19;color:#fff;flex:none;flex-wrap:wrap}
+.demobar .t{font-weight:700;font-size:13.5px}
+.demobar .n{font-size:11.5px;color:#c8c6c4}
+.demobar .tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.demobar .tabs button{background:transparent;border:1px solid #484644;color:#e1dfdd;border-radius:4px;padding:4px 10px;font-size:12.5px}
+.demobar .tabs button.on{background:#fff;color:#1b1a19;border-color:#fff;font-weight:700}
+.demobar .reset{background:transparent;border:1px solid #484644;color:#e1dfdd;border-radius:4px;padding:4px 10px;font-size:12.5px}
+main{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;display:none}
 .view.on{display:flex}
 
-/* ---------- Teams ---------- */
-.rail{width:64px;background:#ebebf5;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:14px;flex:none}
-.rail .ri{width:44px;text-align:center;font-size:10.5px;color:var(--sub)}
-.rail .ri .ic{width:28px;height:28px;border-radius:8px;margin:0 auto 2px;background:#d9d9ee}
-.rail .ri.on{color:var(--brand)} .rail .ri.on .ic{background:var(--brand)}
-.chatlist{width:240px;background:#fafafa;border-right:1px solid var(--line);flex:none;padding:12px 10px}
-.chatlist h3{font-size:13px;margin:0 0 8px 4px;color:var(--sub);font-weight:600}
-.ci{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px}
-.ci.on{background:#fff;box-shadow:0 0 0 1px var(--line)}
-.av{width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;background:var(--brand)}
-.av.me{background:#8a6d3b}
-.ci .t{font-size:13px;font-weight:600} .ci .s{font-size:11.5px;color:var(--sub)}
-.main{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff}
-.chead{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 18px;flex:none}
-.chead .t{font-weight:700} .chead .s{font-size:12px;color:var(--sub)}
-.pill{font-size:11px;background:var(--brand-l);color:var(--brand-d);border-radius:999px;padding:2px 8px;font-weight:600}
-.msgs{flex:1;overflow-y:auto;padding:20px 24px 8px;background:#f8f8fb}
-.row{display:flex;gap:10px;margin-bottom:18px;max-width:1040px}
-.row.me{flex-direction:row-reverse;margin-left:auto}
-.bub{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;max-width:calc(100% - 50px);min-width:0}
-.row.me .bub{background:#e8ebfa;border-color:#d5d9f3}
-.meta{font-size:11.5px;color:var(--sub);margin-bottom:4px}
-.att{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;margin-top:8px;width:max-content;max-width:100%}
-.att .fi{width:34px;height:42px;border-radius:4px;background:#c4314b;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;flex:none}
-.att .fn{font-size:13px;font-weight:600} .att .fs{font-size:11.5px;color:var(--sub)}
-.sec{margin-top:12px}
-.sec h4{margin:0 0 6px;font-size:13.5px}
-.facts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
-.fact{background:#f6f7fb;border-radius:6px;padding:6px 8px} .fact .k{font-size:11px;color:var(--sub)} .fact .v{font-weight:700;font-size:13px}
-table.t{border-collapse:collapse;width:100%;font-size:12.5px}
-table.t th{background:#f1f2f8;text-align:left;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-table.t td{padding:6px 8px;border-bottom:1px solid #eef0f4;vertical-align:top}
-table.t td.n{text-align:right;white-space:nowrap}
-.tag{display:inline-block;font-size:11px;background:#e7f4ee;color:var(--ok);border-radius:4px;padding:0 5px;margin:1px 3px 1px 0;white-space:nowrap}
-.tag.diff{background:#fff1e0;color:var(--warn)}
-.cite{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:var(--brand-l);color:var(--brand-d);font-size:10.5px;font-weight:700;margin-left:3px;vertical-align:1px}
-.est{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.ebox{border:1px solid #d5d9f3;border-radius:10px;padding:10px 12px;background:linear-gradient(#fff,#f7f8fe)}
-.ebox .k{font-size:12px;color:var(--sub)} .ebox .v{font-size:24px;font-weight:700;color:var(--brand-d);line-height:1.3} .ebox .u{font-size:13px;margin-left:2px}
-.ebox .r{font-size:11.5px;color:var(--sub)}
-details{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fcfcfe}
-details summary{cursor:pointer;font-weight:600;font-size:13px}
-.note li{margin-bottom:3px}
-.refs{border-top:1px solid #eef0f4;margin-top:12px;padding-top:8px;font-size:11.5px;color:var(--sub)}
-.refs a{color:var(--brand-d);text-decoration:none;cursor:pointer} .refs a:hover{text-decoration:underline}
-.aigen{font-size:11px;color:#8a8f98;margin-top:6px}
-.typing{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--sub)}
-.dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brand);margin-right:3px;animation:b 1s infinite}
-.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
-@keyframes b{0%,80%,100%{opacity:.25}40%{opacity:1}}
-.steps{font-size:12.5px;color:var(--sub);margin:0;padding-left:18px}
-.steps li.done{color:var(--ok)}
-.sugg{display:flex;flex-wrap:wrap;gap:8px;padding:8px 24px 0}
-.sg{border:1px solid #c9ccef;background:#fff;color:var(--brand-d);border-radius:999px;padding:5px 12px;font-size:12.5px}
-.sg:hover{background:var(--brand-l)} .sg:disabled{opacity:.45;cursor:default}
-.compose{border-top:1px solid var(--line);padding:10px 24px 14px;flex:none;background:#fff}
-.cbox{display:flex;gap:8px;align-items:center;border:1px solid #c9ccd6;border-radius:8px;padding:6px 8px}
-.cbox input{flex:1;border:0;outline:0;font:inherit;font-size:13.5px}
-.clip{border:0;background:#f1f2f8;border-radius:6px;padding:5px 9px;font-size:12.5px;color:var(--brand-d)}
-.send{border:0;background:var(--brand);color:#fff;border-radius:6px;padding:6px 14px;font-weight:600}
-.drawing{border:1px solid var(--line);border-radius:8px;background:#fff;max-width:520px}
-.start{border:1px dashed #c9ccef;border-radius:10px;padding:14px;background:#fbfbff}
-.start .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+/* ================= Teams ================= */
+.t-app{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.t-top{height:48px;background:var(--rail);display:flex;align-items:center;gap:12px;padding:0 12px;flex:none}
+.t-top .nav{display:flex;gap:6px;color:var(--sub)}
+.t-search{flex:1;max-width:560px;margin:0 auto;height:32px;background:#fff;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 10px;color:var(--sub2);font-size:13px;border:1px solid #e6e6e6}
+.t-top .me{display:flex;align-items:center;gap:10px;color:var(--sub)}
+.avs{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex:none}
+.t-body{flex:1;display:flex;min-height:0}
+.t-rail{width:68px;background:var(--rail);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:4px;flex:none}
+.t-rail .ri{width:60px;padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--sub);border-radius:6px;position:relative}
+.t-rail .ri.on{color:var(--brand-h);font-weight:600}
+.t-rail .ri.on::before{content:"";position:absolute;left:-4px;top:12px;bottom:12px;width:3px;border-radius:2px;background:var(--brand)}
+.t-rail .ri svg{width:22px;height:22px}
+.t-list{width:300px;background:var(--panel);border-right:1px solid var(--line);flex:none;display:flex;flex-direction:column;border-top-left-radius:8px}
+.t-list .h{display:flex;align-items:center;padding:14px 14px 8px;font-weight:700;font-size:17px}
+.t-list .h .ic{margin-left:auto;display:flex;gap:10px;color:var(--sub)}
+.t-list .sec{font-size:12px;color:var(--sub);padding:10px 16px 4px}
+.ci{display:flex;gap:10px;align-items:center;margin:1px 6px;padding:8px 10px;border-radius:6px}
+.ci.on{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.ci .tx{min-width:0;flex:1}
+.ci .nm{font-size:13.5px;font-weight:600;display:flex;justify-content:space-between;gap:6px}
+.ci .nm span{font-weight:400;font-size:11.5px;color:var(--sub)}
+.ci .pv{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agav{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#6a6fd6,#4f52b2);display:flex;align-items:center;justify-content:center;flex:none}
+.agav svg{width:18px;height:18px;fill:#fff;stroke:none}
+.t-chat{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.t-ch{height:56px;display:flex;align-items:center;gap:10px;padding:0 18px;background:#fff;border-bottom:1px solid var(--line);flex:none}
+.t-ch .nm{font-weight:700;font-size:15px}
+.t-ch .tb{display:flex;gap:16px;margin-left:14px;font-size:13.5px;color:var(--sub);align-self:stretch;align-items:stretch}
+.t-ch .tb span{display:flex;align-items:center;border-bottom:3px solid transparent}
+.t-ch .tb span.on{color:var(--ink);font-weight:600;border-color:var(--brand)}
+.t-ch .rt{margin-left:auto;display:flex;gap:14px;color:var(--sub)}
+#msgs{flex:1;overflow-y:auto;padding:14px 22px 6px;scroll-behavior:smooth}
+.day{text-align:center;font-size:12px;color:var(--sub);margin:4px 0 12px}
+.m{display:flex;gap:10px;margin:0 0 14px;max-width:880px}
+.m.out{margin-left:auto;justify-content:flex-end;max-width:640px}
+.m .mb{min-width:0;display:flex;flex-direction:column;gap:6px}
+.m.out .mb{align-items:flex-end}
+.mh{font-size:12px;color:var(--sub);display:flex;gap:8px;align-items:center}
+.mh b{color:var(--ink);font-weight:600}
+.ai{font-size:11px;color:var(--sub);border:1px solid var(--line2);border-radius:4px;padding:0 5px;line-height:16px}
+.bub{background:#fff;border-radius:6px;padding:9px 13px;box-shadow:0 1px 2px rgba(0,0,0,.07);font-size:14px;max-width:760px}
+.bub.me{background:var(--brand-l);box-shadow:none}
+.bub p{margin:0 0 6px} .bub p:last-child{margin:0}
+.bub ul{margin:4px 0 4px;padding-left:20px} .bub li{margin:2px 0}
+sup.cit{display:inline-block;min-width:16px;height:16px;line-height:16px;border-radius:4px;background:var(--brand-l);color:var(--brand-h);font-size:10.5px;text-align:center;margin:0 1px;vertical-align:super;cursor:pointer;font-weight:600}
+.refs{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+.refs .rt{background:none;border:0;padding:2px 0;font-size:12px;color:var(--sub)}
+.refs .rl{display:none;flex-direction:column;gap:4px;margin-top:4px}
+.refs.open .rl{display:flex}
+.refs .rr{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer}
+.refs .rr:hover{border-color:var(--brand)}
+.refs .rr .n{width:16px;height:16px;border-radius:4px;background:var(--brand-l);color:var(--brand-h);font-size:10.5px;display:flex;align-items:center;justify-content:center;font-weight:600}
+.fic{width:20px;height:24px;border-radius:3px;display:flex;align-items:flex-end;justify-content:center;font-size:7.5px;font-weight:700;color:#fff;padding-bottom:2px;flex:none;position:relative}
+.fic::after{content:"";position:absolute;right:0;top:0;border-style:solid;border-width:0 6px 6px 0;border-color:transparent #fff transparent transparent;opacity:.6}
+.fic.pdf{background:var(--pdf)} .fic.xl{background:var(--xl)} .fic.big{width:30px;height:36px;font-size:9px}
+.file{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer;min-width:280px}
+.file:hover{border-color:var(--brand)}
+.file .fn{font-size:13px;font-weight:600} .file .fs{font-size:11.5px;color:var(--sub)}
+.typing{display:flex;gap:4px;align-items:center;padding:12px 14px}
+.typing i{width:6px;height:6px;border-radius:50%;background:#9e9e9e;animation:bl 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
 
-/* ---------- SharePoint ---------- */
-.spwrap{flex:1;display:flex;flex-direction:column;background:#fff;min-width:0}
-.sphead{height:48px;background:var(--sp);color:#fff;display:flex;align-items:center;padding:0 18px;gap:12px;flex:none}
-.sphead .t{font-weight:700}
-.spbody{flex:1;display:flex;min-height:0}
-.spnav{width:230px;border-right:1px solid var(--line);padding:12px;flex:none;background:#fafbfb}
-.spnav .f{padding:7px 10px;border-radius:6px;cursor:pointer;font-size:13px}
-.spnav .f.on{background:var(--sp-l);color:var(--sp);font-weight:700}
-.spmain{flex:1;overflow:auto;padding:16px 20px;min-width:0}
-.crumb{font-size:12.5px;color:var(--sub);margin-bottom:8px}
-.syncnote{font-size:12px;background:var(--sp-l);color:#05494b;border-radius:6px;padding:6px 10px;margin-bottom:12px}
-.xlbar{display:flex;align-items:center;gap:8px;background:var(--xl);color:#fff;padding:6px 10px;border-radius:6px 6px 0 0;font-size:12.5px}
-.xlwrap{border:1px solid var(--line);border-top:0;overflow:auto;max-height:calc(100vh - 250px)}
-table.xl{border-collapse:collapse;font-size:12px;white-space:nowrap}
-table.xl th{background:#f3f3f3;border:1px solid #dcdcdc;padding:4px 8px;position:sticky;top:0}
-table.xl td{border:1px solid #e3e3e3;padding:4px 8px}
-table.xl td.n{text-align:right}
-table.xl tr.hl td{background:#fff7d6}
-.files{border-collapse:collapse;width:100%;font-size:13px}
-.files th{text-align:left;color:var(--sub);font-weight:600;border-bottom:1px solid var(--line);padding:6px 8px}
-.files td{border-bottom:1px solid #f0f1f3;padding:7px 8px}
-.files a{color:var(--sp);cursor:pointer;text-decoration:none} .files a:hover{text-decoration:underline}
-.preview{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:14px}
+/* アダプティブ カード */
+.ac{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:760px;max-width:100%;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.ac-h{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ac-t{font-weight:700;font-size:16px}
+.ac-s{font-size:13px;color:var(--sub)}
+.ac-b{padding:6px 16px 10px}
+.ac-l{font-size:12.5px;font-weight:700;color:var(--sub);margin:12px 0 6px}
+.fs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 14px}
+.fs .f{display:flex;flex-direction:column;border-bottom:1px dashed #ececec;padding:3px 0 4px}
+.fs .k{font-size:11.5px;color:var(--sub)}
+.fs .v{font-size:13.5px;font-weight:600}
+.fs .src{font-size:10.5px;color:var(--sub2);font-weight:400;margin-left:6px}
+.fs .src.w{color:var(--warn)}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kpi{background:var(--brand-l2);border-radius:6px;padding:9px 12px}
+.kpi .k{font-size:12px;color:var(--sub)}
+.kpi .v{font-size:26px;font-weight:700;color:var(--brand-h);line-height:1.25}
+.kpi .v small{font-size:13px;margin-left:3px;font-weight:600}
+.kpi .r{font-size:11.5px;color:var(--sub)}
+.ct{width:100%;border-collapse:collapse;font-size:12.5px}
+.ct th{text-align:left;font-weight:600;color:var(--sub);font-size:11.5px;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ct td{padding:6px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+.ct td.n,.ct th.n{text-align:right;white-space:nowrap}
+.ct .sm{font-size:11px;color:var(--sub)}
+.sc{display:inline-block;min-width:44px;text-align:center;border-radius:10px;background:var(--brand-l);color:var(--brand-h);font-weight:700;font-size:11.5px;padding:0 6px}
+.tog{margin-top:10px;font-size:13px;color:var(--brand-h);cursor:pointer;font-weight:600;user-select:none}
+.tgb{background:#fafafa;border:1px solid #eee;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12.5px}
+.tgb ul{margin:4px 0 8px;padding-left:18px}
+.ac ul.nt{margin:0;padding-left:18px;font-size:13px}
+.ac ul.nt li{margin:2px 0}
+.ac-f{font-size:11.5px;color:var(--sub);margin-top:10px}
+.ac-a{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.ac-a button{background:#fff;border:1px solid var(--line2);border-radius:4px;padding:5px 12px;font-size:13px;font-weight:600}
+.ac-a button:hover{background:#f5f5f5}
+.ac-show{padding:10px 16px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;background:#fafafa}
+.ac-show[hidden]{display:none}
+.ac-show input{width:120px;padding:5px 8px;border:1px solid var(--line2);border-radius:4px;font:inherit;border-bottom:2px solid var(--brand)}
+.pri{background:var(--brand)!important;color:#fff!important;border:0!important;border-radius:4px;padding:6px 14px;font-weight:600}
+.ac-d{font-size:11px;color:var(--sub2);padding:0 16px 10px}
+.mini{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.mini div{background:var(--brand-l2);border-radius:6px;padding:6px 8px}
+.mini .k{font-size:11px;color:var(--sub)} .mini .v{font-weight:700}
 
-/* ---------- しくみ ---------- */
-.howwrap{flex:1;overflow:auto;padding:24px;background:#fff}
-.how{max-width:1080px;margin:0 auto}
-.how h2{font-size:20px;margin:0 0 4px} .how .lead{color:var(--sub);margin:0 0 18px}
-.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:stretch}
-.fbox{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fafbff}
-.fbox .h{font-weight:700;margin-bottom:4px} .fbox .p{font-size:12px;color:var(--brand-d);font-weight:700;margin-bottom:6px}
-.fbox ul{margin:0;padding-left:16px;font-size:12.5px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
-.card{border:1px solid var(--line);border-radius:10px;padding:14px}
-.card h3{margin:0 0 8px;font-size:15px}
-.card ul{margin:0;padding-left:18px;font-size:13px}
-@media (max-width:900px){
-  .chatlist,.rail,.spnav{display:none}
-  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .est,.flow,.grid2{grid-template-columns:1fr}
-  .tabs .tab{padding:4px 8px;font-size:12px}
-  .top .sub{display:none}
-}
-.att.open{cursor:pointer} .att.open:hover{border-color:var(--brand)}
-.att .op{font-size:11.5px;color:var(--brand-d);margin-left:6px}
-.viewer{position:fixed;inset:0;background:rgba(20,22,28,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.t-sugg{display:flex;gap:8px;flex-wrap:wrap;padding:6px 22px 8px;flex:none}
+.t-sugg button{background:#fff;border:1px solid var(--line2);border-radius:16px;padding:5px 14px;font-size:13px;color:var(--brand-h)}
+.t-sugg button:hover{background:var(--brand-l2);border-color:var(--brand)}
+.composer{margin:0 22px 16px;background:#fff;border-radius:6px;border:1px solid var(--line);border-bottom:2px solid var(--brand);flex:none}
+.cchip{margin:8px 10px 0;display:flex;align-items:center;gap:8px;background:#fafafa;border:1px solid var(--line);border-radius:6px;padding:6px 10px;width:max-content}
+.cchip[hidden]{display:none}
+.cchip .fn{font-size:12.5px;font-weight:600} .cchip .fs{font-size:11px;color:var(--sub)}
+.cchip .x{border:0;background:none;color:var(--sub);font-size:16px;margin-left:6px}
+.crow{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 12px}
+.crow input{flex:1;border:0;outline:0;font:inherit;font-size:14px;padding:6px 0;background:transparent}
+.cic{display:flex;gap:4px;color:var(--sub)}
+.cic button{background:none;border:0;border-radius:4px;padding:4px;display:flex;color:var(--sub)}
+.cic button:hover{background:#f0f0f0;color:var(--brand-h)}
+.cic button.send{color:var(--brand)}
+.cic button.pulse{animation:pu 1.2s infinite;background:var(--brand-l)}
+@keyframes pu{0%,100%{box-shadow:0 0 0 0 rgba(91,95,199,.45)}50%{box-shadow:0 0 0 6px rgba(91,95,199,0)}}
+
+/* ファイル ビューア（Teams 内） */
+.viewer{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
 .viewer[hidden]{display:none}
-.viewer .vb{background:#fff;border-radius:10px;max-width:640px;width:100%;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.viewer .vh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600}
-.viewer .vh .x{margin-left:auto;cursor:pointer;border:0;background:none;font-size:18px;color:var(--sub)}
-.viewer .vc{padding:14px;overflow:auto}
-.viewer .vc svg{max-width:100%;height:auto}
+.viewer .vb{background:#fff;border-radius:8px;width:min(900px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden}
+.viewer .vh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:14px}
+.viewer .vh .x{margin-left:auto;border:0;background:none;font-size:20px;color:var(--sub)}
+.viewer .vc{background:#e8e8e8;padding:18px;overflow:auto}
+.page{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);margin:0 auto;max-width:860px}
+.page svg{display:block;width:100%;height:auto}
+
+/* ================= SharePoint ================= */
+.sp-app{flex:1;display:flex;flex-direction:column;background:#faf9f8;min-width:0}
+.sp-suite{height:48px;background:var(--sp);color:#fff;display:flex;align-items:center;gap:14px;padding:0 14px;flex:none}
+.sp-suite .nm{font-weight:600;font-size:15px}
+.sp-suite .sr{flex:1;max-width:460px;margin:0 auto;height:32px;background:#fff;border-radius:4px;display:flex;align-items:center;gap:8px;padding:0 10px;color:var(--sub2);font-size:13px}
+.sp-head{background:#fff;padding:14px 24px 0;border-bottom:1px solid var(--line);flex:none}
+.sp-head .row{display:flex;align-items:center;gap:12px}
+.sp-logo{width:44px;height:44px;border-radius:6px;background:var(--sp);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.sp-head .st{font-size:21px;font-weight:600}
+.sp-head .nv{display:flex;gap:22px;font-size:13.5px;margin-top:10px}
+.sp-head .nv span{padding:8px 0;border-bottom:2px solid transparent;color:var(--sub)}
+.sp-head .nv span.on{border-color:var(--sp);color:var(--ink);font-weight:600}
+.sp-cmd{display:flex;gap:4px;align-items:center;background:#fff;padding:6px 20px;border-bottom:1px solid var(--line);flex:none;flex-wrap:wrap}
+.sp-cmd span{display:flex;align-items:center;gap:6px;font-size:13px;padding:5px 9px;border-radius:4px;color:var(--ink)}
+.sp-cmd span svg{width:16px;height:16px;color:var(--sp)}
+.sp-cmd .r{margin-left:auto;color:var(--sub)}
+.sp-main{flex:1;overflow:auto;padding:14px 24px 30px}
+.crumb{font-size:19px;font-weight:600;margin:4px 0 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.crumb a{color:var(--sub);font-weight:400}
+.crumb .sep{color:var(--sub2);font-weight:400}
+.infobar{background:var(--sp-l);border-radius:4px;padding:8px 12px;font-size:12.5px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
+table.fl{width:100%;border-collapse:collapse;background:#fff;font-size:13.5px}
+table.fl th{text-align:left;font-weight:600;font-size:12.5px;color:var(--sub);padding:9px 10px;border-bottom:1px solid var(--line)}
+table.fl td{padding:9px 10px;border-bottom:1px solid #f0f0f0}
+table.fl tr.cl{cursor:pointer} table.fl tr.cl:hover td{background:#f3f2f1}
+table.fl td .nmc{display:flex;align-items:center;gap:10px}
+.fold{width:24px;height:20px;position:relative;flex:none}
+.fold::before{content:"";position:absolute;left:0;top:0;width:10px;height:5px;background:#e8b13f;border-radius:2px 2px 0 0}
+.fold::after{content:"";position:absolute;left:0;top:3px;width:24px;height:17px;background:#f5c94b;border-radius:2px}
+/* Excel for the web */
+.xl-app{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff}
+.xl-top{height:44px;background:var(--xl);color:#fff;display:flex;align-items:center;gap:12px;padding:0 12px;flex:none}
+.xl-top .nm{font-size:13.5px} .xl-top b{font-weight:700;font-size:15px}
+.xl-top .bk{margin-left:auto;background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:4px;padding:4px 10px;font-size:12.5px}
+.xl-rb{display:flex;gap:18px;padding:6px 14px 0;font-size:13px;border-bottom:1px solid var(--line);flex:none;background:#f3f2f1}
+.xl-rb span{padding:4px 0 7px;border-bottom:3px solid transparent} .xl-rb span.on{border-color:var(--xl);font-weight:600}
+.xl-fx{display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid var(--line);font-size:12.5px;flex:none}
+.xl-fx .nb{width:70px;border:1px solid var(--line);padding:2px 6px} .xl-fx .fx{flex:1;border:1px solid var(--line);padding:2px 8px}
+.xl-grid{flex:1;overflow:auto}
+table.xg{border-collapse:collapse;font-size:12.5px;font-family:"Segoe UI","Hiragino Sans",sans-serif}
+table.xg td,table.xg th{border:1px solid #e1e1e1;padding:3px 8px;white-space:nowrap;height:24px}
+table.xg th{background:#f3f2f1;font-weight:400;color:#444;text-align:center;position:sticky;top:0;z-index:1}
+table.xg td.rn{background:#f3f2f1;color:#444;text-align:center;position:sticky;left:0;min-width:36px}
+table.xg tr.hd td{font-weight:700;background:#e9f5ee}
+table.xg td.n{text-align:right}
+table.xg tr.hl td:not(.rn){background:#fff4ce}
+table.xg tr.hl td.rn{background:#f7d774;color:#000;font-weight:700}
+.xl-tabs{display:flex;gap:2px;padding:4px 10px;border-top:1px solid var(--line);font-size:12.5px;background:#f3f2f1;flex:none}
+.xl-tabs span{padding:3px 14px;background:#fff;border-bottom:2px solid var(--xl);font-weight:600}
+.pdf-app{flex:1;display:flex;flex-direction:column;min-width:0;background:#3b3a39}
+.pdf-top{height:44px;background:#252423;color:#fff;display:flex;align-items:center;gap:12px;padding:0 12px;flex:none;font-size:13.5px}
+.pdf-top .bk{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:4px;padding:4px 10px;font-size:12.5px}
+.pdf-top .r{margin-left:auto;color:#c8c6c4;font-size:12.5px}
+.pdf-body{flex:1;overflow:auto;padding:24px}
+
+/* ================= Copilot Studio ================= */
+.cs-app{flex:1;display:flex;flex-direction:column;background:#f7f7f7;min-width:0}
+.cs-top{height:48px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 14px;flex:none}
+.cs-top .nm{font-weight:600;font-size:15px}
+.cs-top .env{margin-left:auto;font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:4px;padding:3px 10px}
+.cs-body{flex:1;display:flex;min-height:0}
+.cs-nav{width:64px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:8px;flex:none}
+.cs-nav .ri{width:56px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;font-size:10px;color:var(--sub);border-radius:6px}
+.cs-nav .ri.on{background:var(--cs-l);color:var(--cs);font-weight:600}
+.cs-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.cs-ah{background:#fff;padding:12px 22px 0;border-bottom:1px solid var(--line);flex:none}
+.cs-ah .row{display:flex;align-items:center;gap:10px}
+.cs-ah .an{font-size:19px;font-weight:600}
+.pill{font-size:11.5px;border-radius:10px;padding:1px 9px;background:#e7f2e7;color:var(--ok);font-weight:600}
+.cs-ah .bt{margin-left:auto;display:flex;gap:8px}
+.cs-ah .bt span{border:1px solid var(--line2);border-radius:4px;padding:4px 12px;font-size:13px;font-weight:600;background:#fff}
+.cs-ah .bt span.p{background:var(--cs);color:#fff;border-color:var(--cs)}
+.cs-ah .tb{display:flex;gap:20px;font-size:13.5px;margin-top:10px;flex-wrap:wrap}
+.cs-ah .tb span{padding:7px 0;border-bottom:2px solid transparent;color:var(--sub)}
+.cs-ah .tb span.on{color:var(--ink);font-weight:600;border-color:var(--cs)}
+.cs-cnt{flex:1;overflow:auto;padding:16px 22px 30px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+.cs-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.cs-card h3{margin:0 0 8px;font-size:14.5px;display:flex;align-items:center;gap:8px}
+.cs-card h3 .cnt{font-weight:400;color:var(--sub);font-size:12.5px}
+.cs-card .ds{font-size:12.5px;color:var(--sub);margin:-4px 0 8px}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:13px}
+.kv .k{color:var(--sub)}
+.instr{background:#fafafa;border:1px solid #eee;border-radius:6px;padding:10px 12px;font-size:12.5px;white-space:pre-wrap;line-height:1.65}
+.tool{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:6px;padding:9px 11px;margin-bottom:8px}
+.tool .ti{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;color:#fff;font-size:11px;font-weight:700}
+.tool .tn{font-weight:600;font-size:13.5px}
+.tool .tt{font-size:11.5px;color:var(--sub)}
+.tool .td{font-size:12px;color:var(--sub);margin-top:2px}
+.tg{display:inline-block;font-size:10.5px;border-radius:4px;padding:0 6px;margin-left:6px;background:var(--cs-l);color:var(--cs);font-weight:600}
+.tg.pv{background:#fff4ce;color:#8a6100}
+.sw{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #f0f0f0}
+.sw:last-child{border:0}
+.sw .s{width:36px;height:20px;border-radius:10px;background:var(--cs);position:relative;flex:none}
+.sw .s::after{content:"";position:absolute;right:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff}
+.sw .sd{font-size:11.5px;color:var(--sub)}
+.act{position:relative;padding-left:22px}
+.act::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:#e1e1e1}
+.st{position:relative;margin-bottom:10px}
+.st::before{content:"";position:absolute;left:-19px;top:9px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--cs)}
+.st details{background:#fff;border:1px solid var(--line);border-radius:6px}
+.st summary{padding:8px 11px;cursor:pointer;font-size:13px;list-style:none;display:flex;gap:8px;align-items:center}
+.st summary::-webkit-details-marker{display:none}
+.st summary .ty{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.st summary .ok{margin-left:auto;color:var(--ok);font-size:12px}
+.st .bd{padding:0 11px 10px;font-size:12px}
+pre.js{background:#1e1e1e;color:#d4d4d4;border-radius:6px;padding:10px 12px;font-size:11.5px;overflow:auto;margin:6px 0 0;line-height:1.5;font-family:Menlo,Consolas,monospace;max-height:340px}
+.empty{background:#fff;border:1px dashed var(--line2);border-radius:8px;padding:24px;text-align:center;color:var(--sub);font-size:13px}
+
+/* ================= しくみ ================= */
+.how{flex:1;overflow:auto;padding:24px 30px 40px;background:#fff}
+.how h2{margin:0 0 4px;font-size:21px}
+.how .lead{color:var(--sub);margin:0 0 18px}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.fb{border:1px solid var(--line);border-radius:8px;padding:12px;position:relative;background:#fff}
+.fb .p{font-size:11.5px;font-weight:700}
+.fb .h{font-weight:700;margin:2px 0 6px;font-size:14.5px}
+.fb ul{margin:0;padding-left:16px;font-size:12.5px;color:#444}
+.fb:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:42%;font-weight:700;color:var(--sub);background:#fff}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card2{border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.card2 h3{margin:0 0 8px;font-size:15px}
+.card2 ul{margin:0;padding-left:18px;font-size:13px} .card2 li{margin:4px 0}
+
+@media (max-width:1150px){
+  .t-list{display:none} .cs-cnt{grid-template-columns:1fr} .flow{grid-template-columns:1fr 1fr} .fb::after{display:none}
+  .fs{grid-template-columns:repeat(2,1fr)} .mini{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:760px){
+  .t-rail,.cs-nav{display:none} .kp{grid-template-columns:1fr} .g2{grid-template-columns:1fr} #msgs{padding:12px} .composer{margin:0 10px 10px}
+  .demobar .tabs{margin-left:0}
+}
 </style>
 </head>
 <body>
-<div class="notice">デモ用の画面イメージです。過去案件・図面・金額はすべて架空のデータで、概算は画面の中で実際に計算しています。</div>
-<div class="top">
-  <span class="brand">見積AIエージェント デモ</span>
-  <span class="sub">Microsoft Teams 上の Copilot Studio エージェント（画面イメージ）</span>
+<div class="demobar">
+  <div><div class="t">見積AIエージェント デモ</div><div class="n">画面イメージです（実際の Microsoft 製品の画面ではありません）。図面・過去案件・金額はすべて架空のデータで、概算は画面の中で実際に計算しています。</div></div>
   <div class="tabs">
-    <button class="tab on" data-v="teams">Teams（見積AI）</button>
-    <button class="tab" data-v="sp">SharePoint（参照データ）</button>
-    <button class="tab" data-v="how">しくみ</button>
+    <button data-v="teams" class="on">① Teams（使う人の画面）</button>
+    <button data-v="sp">② SharePoint（参照データ）</button>
+    <button data-v="cs">③ Copilot Studio（作る側の画面）</button>
+    <button data-v="how">④ しくみ</button>
   </div>
+  <button class="reset" onclick="resetDemo()">最初から</button>
 </div>
-
-<!-- ============ Teams ============ -->
-<section class="view on" id="v-teams">
-  <div class="rail">
-    <div class="ri"><div class="ic"></div>アクティビティ</div>
-    <div class="ri on"><div class="ic"></div>チャット</div>
-    <div class="ri"><div class="ic"></div>チーム</div>
-    <div class="ri"><div class="ic"></div>予定表</div>
+<main>
+<!-- ① Teams -->
+<section class="view on" id="v-teams"><div class="t-app">
+  <div class="t-top">
+    <div class="nav" id="tnav"></div>
+    <div class="t-search" id="tsearch"></div>
+    <div class="me"><span id="tdots"></span><div class="avs" style="background:#8764b8">見積</div></div>
   </div>
-  <div class="chatlist">
-    <h3>チャット</h3>
-    <div class="ci on"><div class="av">見</div><div><div class="t">見積AI</div><div class="s">図面から概算を出します</div></div></div>
-    <div class="ci"><div class="av me">製</div><div><div class="t">製造部 熟練工グループ</div><div class="s">確認お願いします</div></div></div>
-  </div>
-  <div class="main">
-    <div class="chead">
-      <div class="av">見</div>
-      <div><div class="t">見積AI <span class="pill">エージェント</span></div><div class="s">過去案件の実績から、工数・材料費・設計時間の概算を根拠つきで出します</div></div>
+  <div class="t-body">
+    <div class="t-rail" id="trail"></div>
+    <div class="t-list">
+      <div class="h">チャット<span class="ic" id="tlistic"></span></div>
+      <div class="sec">固定</div>
+      <div class="ci on"><div class="agav" id="av1"></div><div class="tx"><div class="nm">見積AI<span id="lt1"></span></div><div class="pv" id="lpv">図面（PDF）を添付して送ってください</div></div></div>
+      <div class="sec">最近</div>
+      <div class="ci"><div class="avs" style="background:#ca5010">製</div><div class="tx"><div class="nm">製造部 熟練工グループ<span>11:20</span></div><div class="pv">午後の段取り、2号機から始めます</div></div></div>
+      <div class="ci"><div class="avs" style="background:#038387">営</div><div class="tx"><div class="nm">営業チーム<span>昨日</span></div><div class="pv">来週の見積依頼、一覧にまとめました</div></div></div>
+      <div class="ci"><div class="avs" style="background:#4f6bed">総</div><div class="tx"><div class="nm">総務からのお知らせ<span>月曜日</span></div><div class="pv">年末の工場稼働日について</div></div></div>
     </div>
-    <div class="msgs" id="msgs"></div>
-    <div class="sugg" id="sugg"></div>
-    <div class="compose">
-      <div class="cbox">
-        <button class="clip" id="clip" title="ファイルを添付">📎 図面を添付</button>
-        <input id="inp" placeholder="見積AI にメッセージを送信（デモでは上の候補を選んでください）">
-        <button class="send" id="send">送信</button>
+    <div class="t-chat">
+      <div class="t-ch"><div class="agav" id="av2"></div><div class="nm">見積AI</div>
+        <div class="tb"><span class="on">チャット</span><span>バージョン情報</span></div>
+        <div class="rt" id="tchr"></div></div>
+      <div id="msgs"></div>
+      <div class="t-sugg" id="sugg"></div>
+      <div class="composer">
+        <div class="cchip" id="chip" hidden><div class="fic pdf">PDF</div><div><div class="fn">NB-3120_取付ブラケット.pdf</div><div class="fs">182 KB</div></div><button class="x" onclick="detach()" title="削除">×</button></div>
+        <div class="crow"><input id="inp" placeholder="メッセージを入力" autocomplete="off">
+          <div class="cic"><button id="bAttach" title="ファイルを添付"></button><button id="bSend" class="send" title="送信"></button></div></div>
       </div>
     </div>
   </div>
-</section>
+</div></section>
 
-<!-- ============ SharePoint ============ -->
-<section class="view" id="v-sp">
-  <div class="spwrap">
-    <div class="sphead"><span class="t">SharePoint</span><span>見積AI参照用ライブラリ</span></div>
-    <div class="spbody">
-      <div class="spnav">
-        <div class="f on" data-f="xl">📊 TECHS出力（過去案件一覧）</div>
-        <div class="f" data-f="pdf">📄 図面PDF</div>
-        <div class="f" data-f="old">📁 過去案件資料</div>
+<!-- ② SharePoint -->
+<section class="view" id="v-sp"></section>
+
+<!-- ③ Copilot Studio -->
+<section class="view" id="v-cs"><div class="cs-app">
+  <div class="cs-top"><span id="cswf"></span><span class="nm">Copilot Studio</span><span class="env">環境：本番（デモ）</span><div class="avs" style="background:#0f6cbd">管理</div></div>
+  <div class="cs-body">
+    <div class="cs-nav" id="csnav"></div>
+    <div class="cs-main">
+      <div class="cs-ah"><div class="row"><div class="agav" id="av3"></div><div class="an">見積AI</div><span class="pill">公開済み</span><div class="bt"><span>テスト</span><span class="p">公開</span></div></div>
+        <div class="tb"><span class="on">概要</span><span>ナレッジ</span><span>ツール</span><span>エージェント</span><span>トピック</span><span>アクティビティ</span><span>評価</span><span>分析</span><span>チャネル</span></div></div>
+      <div class="cs-cnt">
+        <div>
+          <div class="cs-card"><h3>詳細</h3><div class="kv">
+            <div class="k">名前</div><div>見積AI</div>
+            <div class="k">説明</div><div>図面と仕様から、過去案件の実績をもとに加工工数・材料費・設計時間の概算と根拠を出します。</div>
+            <div class="k">オーケストレーション</div><div>生成 AI（オン）</div>
+            <div class="k">公開先</div><div>Microsoft Teams</div></div></div>
+          <div class="cs-card"><h3>指示</h3><div class="instr" id="instr"></div></div>
+          <div class="cs-card"><h3>ナレッジ <span class="cnt">1</span></h3>
+            <div class="tool"><div class="ti" style="background:var(--sp)">SP</div><div><div class="tn">見積AI参照用 ＞ ドキュメント ＞ AI連携フォルダ</div><div class="tt">SharePoint・状態：準備完了</div><div class="td">図面PDF（24件）・TECHS出力（過去案件一覧_TECHS出力.xlsx）</div></div></div></div>
+          <div class="cs-card"><h3>ツール <span class="cnt">3</span></h3><div class="ds">トピック「概算を作成」の中で、上から順に呼び出します。</div>
+            <div class="tool"><div class="ti" style="background:#8764b8">P</div><div><div class="tn">図面の読み取り<span class="tg">プロンプト</span></div><div class="td">入力：図面（PDF）／出力：JSON（図番・品名・材質・板厚・展開寸法・穴・曲げ・表面処理）。読み取れない項目は「要確認」で返す</div></div></div>
+            <div class="tool"><div class="ti" style="background:var(--sp)">SP</div><div><div class="tn">過去案件一覧の取得<span class="tg">コネクタ</span></div><div class="td">SharePoint「ファイル コンテンツの取得」：過去案件一覧_TECHS出力.xlsx</div></div></div>
+            <div class="tool"><div class="ti" style="background:#8764b8">P</div><div><div class="tn">類似案件の検索と概算<span class="tg">プロンプト</span><span class="tg">コード インタープリター</span></div><div class="td">入力：過去案件一覧（Excel）・読み取り結果・数量／出力：JSON（似た案件5件・一致度・概算と幅）。計算は Python で実行</div></div></div></div>
+          <div class="cs-card"><h3>推奨プロンプト</h3><div class="kv"><div class="k">図面の概算</div><div>この図面の概算をお願いします</div><div class="k">数量を変える</div><div>数量を50個にした場合は？</div><div class="k">確認点</div><div>熟練工が確認すべき点は？</div></div></div>
+          <div class="cs-card"><h3>設定（生成 AI）</h3>
+            <div class="sw"><div>ファイルのアップロード<div class="sd">Teams のチャットで図面（PDF）を受け取る</div></div><div class="s"></div></div>
+            <div class="sw"><div>コード インタープリター<div class="sd">Excel の実績を Python で集計する</div></div><div class="s"></div></div>
+            <div class="sw"><div>ユーザー認証<div class="sd">Microsoft で認証（Teams のサインインを使う）</div></div><div class="s"></div></div></div>
+        </div>
+        <div>
+          <div class="cs-card" style="margin-bottom:10px"><h3>アクティビティ（最新の実行）</h3><div class="ds">Teams で図面を送ると、エージェントの中で何が起きたかがここに出ます。各段階を開くと入力と出力を見られます。</div><div id="act"></div></div>
+        </div>
       </div>
-      <div class="spmain" id="spmain"></div>
     </div>
   </div>
-</section>
+</div></section>
 
-<!-- ============ しくみ ============ -->
-<section class="view" id="v-how">
-  <div class="howwrap"><div class="how">
-    <h2>しくみ（PoC の構成）</h2>
-    <p class="lead">御社のシステムは改修せず、QNAP と TECHS のデータを SharePoint に集めて、見積AIが参照します。</p>
-    <div class="flow">
-      <div class="fbox"><div class="p">御社 社内</div><div class="h">図面・過去案件</div><ul><li>CAD 図面は PDF で出力</li><li>QNAP の「AI連携フォルダ」に保存</li></ul></div>
-      <div class="fbox"><div class="p">御社 社内</div><div class="h">TECHS の実績</div><ul><li>画面・帳票から Excel で出力</li><li>同じフォルダに保存（オプションで自動取得も可）</li></ul></div>
-      <div class="fbox"><div class="p">QNAP 標準アプリ</div><div class="h">HBS 3 で同期</div><ul><li>決まった時刻に SharePoint へ片方向で同期</li><li>現場のファイルの使い方は変わりません</li></ul></div>
-      <div class="fbox"><div class="p">Microsoft 365</div><div class="h">SharePoint</div><ul><li>見積AIの参照先</li><li>閲覧権限は御社で管理</li></ul></div>
-      <div class="fbox"><div class="p">Copilot Studio</div><div class="h">見積AI（Teams）</div><ul><li>図面の読み取り・似た案件の検索</li><li>実績から計算し、根拠つきで回答</li></ul></div>
-    </div>
-    <div class="grid2">
-      <div class="card"><h3>このデモで見せていること</h3><ul>
-        <li>図面 PDF と仕様を添付すると、品名・材質・寸法・加工内容を読み取る</li>
-        <li>品名・材質・板厚などの文字と数値の条件で、似た過去案件を5件探す</li>
-        <li>その実績（段取・加工時間・材料費・設計時間）から概算を計算し、計算の根拠と参照元を示す</li>
-        <li>数量や板厚を変えた場合を、チャットで聞き直せる</li>
-      </ul></div>
-      <div class="card"><h3>PoC の対象外・注意</h3><ul>
-        <li>図面の「形」そのもので似た図面を探すことはしません（文字と数値の条件で探します）</li>
-        <li>最終的な見積金額は、熟練工の方・ご担当者が確認して決めます</li>
-        <li>精度は TECHS に残っている実績の範囲で決まります（要件定義で確認）</li>
-        <li>図面から読み取れる項目と精度は、御社の実際の図面で確かめます（品名・材質などの文字は読みやすく、穴や曲げの数は図面の描き方によります）</li>
-        <li>実際の画面は Teams の標準の表示（文章・表・カード）になり、このデモとは見た目が異なります</li>
-        <li>見積書の自動作成・NIコラボ連携は次の段階です</li>
-      </ul></div>
-    </div>
-  </div></div>
-</section>
+<!-- ④ しくみ -->
+<section class="view" id="v-how"><div class="how">
+  <h2>しくみ（PoC の構成）</h2>
+  <p class="lead">御社のシステムは改修せず、QNAP と TECHS のデータを SharePoint に集めて、見積AIが参照します。</p>
+  <div class="flow">
+    <div class="fb"><div class="p" style="color:#8a6100">御社 社内</div><div class="h">図面・過去案件</div><ul><li>CAD 図面は PDF で出力</li><li>QNAP の「AI連携フォルダ」に保存</li></ul></div>
+    <div class="fb"><div class="p" style="color:#8a6100">御社 社内</div><div class="h">TECHS の実績</div><ul><li>画面・帳票から Excel で出力</li><li>同じフォルダに保存（オプションで自動取得も可）</li></ul></div>
+    <div class="fb"><div class="p" style="color:#555">QNAP 標準アプリ</div><div class="h">HBS 3 で同期</div><ul><li>決まった時刻に SharePoint へ片方向で同期</li><li>現場のファイルの使い方は変わりません</li></ul></div>
+    <div class="fb"><div class="p" style="color:var(--sp)">Microsoft 365</div><div class="h">SharePoint</div><ul><li>見積AIの参照先</li><li>閲覧権限は御社で管理</li></ul></div>
+    <div class="fb"><div class="p" style="color:var(--brand-h)">Copilot Studio</div><div class="h">見積AI（Teams）</div><ul><li>図面の読み取り・似た案件の検索</li><li>実績から計算し、根拠つきで回答</li></ul></div>
+  </div>
+  <div class="g2">
+    <div class="card2"><h3>このデモで見せていること</h3><ul>
+      <li>図面 PDF と仕様を渡すと、品名・材質・寸法・加工内容を読み取る</li>
+      <li>品名・材質・板厚などの文字と数値の条件で、似た過去案件を5件探す</li>
+      <li>その実績（段取り・加工時間・材料費・設計時間）から概算を計算し、計算の根拠と参照元を示す</li>
+      <li>数量や板厚を変えた場合も、チャットで続けて計算し直せる</li>
+    </ul></div>
+    <div class="card2"><h3>PoC の対象外・注意</h3><ul>
+      <li>図面の「形」そのもので似た図面を探すことはしません（文字と数値の条件で探します）</li>
+      <li>最終的な見積金額は、熟練工の方・ご担当者が確認して決めます</li>
+      <li>精度は TECHS に残っている実績の範囲で決まります（要件定義で確認）</li>
+      <li>図面から読み取れる項目と精度は、御社の実際の図面で確かめます（品名・材質などの文字は読みやすく、穴や曲げの数は図面の描き方によります）</li>
+      <li>実際の画面は Teams の標準の表示（文章・カード）になり、このデモとは見た目が異なります</li>
+      <li>見積書の自動作成・NIコラボ連携は次の段階です</li>
+    </ul></div>
+  </div>
+</div></section>
+</main>
 
-<div id="viewer" class="viewer" hidden><div class="vb"><div class="vh">📄 NB-3120_取付ブラケット.pdf<button class="x" aria-label="閉じる">×</button></div><div class="vc"></div></div></div>
+<div id="viewer" class="viewer" hidden><div class="vb"><div class="vh"><div class="fic pdf">PDF</div><span id="vname"></span><button class="x" onclick="closeViewer()" aria-label="閉じる">×</button></div><div class="vc"><div class="page" id="vpage"></div></div></div></div>
+
 <script>
 const DATA = [{"no": "BP-2045", "name": "ベースプレート", "mat": "SS400", "t": 6, "w": 280, "h": 200, "holes": 6, "bends": 0, "surf": "三価クロメート", "qty": 30, "setup": 1.4, "proc": 8.6, "matcost": 16050, "design": 1.5, "date": "2026/06", "cust": "B社"}, {"no": "BR-2012", "name": "取付ブラケット", "mat": "SUS304", "t": 3.2, "w": 250, "h": 160, "holes": 6, "bends": 2, "surf": "なし", "qty": 40, "setup": 2.1, "proc": 14.4, "matcost": 27400, "design": 2.5, "date": "2026/05", "cust": "A社"}, {"no": "ST-1988", "name": "ステー", "mat": "SUS304", "t": 4, "w": 220, "h": 40, "holes": 2, "bends": 1, "surf": "なし", "qty": 80, "setup": 2.1, "proc": 13.6, "matcost": 15400, "design": 2.0, "date": "2026/03", "cust": "C社"}, {"no": "BR-1950", "name": "取付ブラケット", "mat": "SS400", "t": 6, "w": 320, "h": 220, "holes": 10, "bends": 2, "surf": "塗装", "qty": 15, "setup": 1.9, "proc": 6.9, "matcost": 9910, "design": 2.5, "date": "2026/02", "cust": "C社"}, {"no": "ST-1940", "name": "ステー", "mat": "A5052", "t": 3, "w": 200, "h": 35, "holes": 2, "bends": 1, "surf": "アルマイト", "qty": 120, "setup": 1.9, "proc": 15.5, "matcost": 6370, "design": 2.0, "date": "2026/02", "cust": "F社"}, {"no": "BP-1915", "name": "ベースプレート", "mat": "SUS304", "t": 6, "w": 300, "h": 300, "holes": 4, "bends": 0, "surf": "なし", "qty": 8, "setup": 1.6, "proc": 2.6, "matcost": 23380, "design": 1.5, "date": "2026/01", "cust": "D社"}, {"no": "LK-1902", "name": "L金具", "mat": "SUS304", "t": 3, "w": 160, "h": 120, "holes": 4, "bends": 1, "surf": "なし", "qty": 60, "setup": 2.1, "proc": 13.5, "matcost": 18570, "design": 1.5, "date": "2026/01", "cust": "B社"}, {"no": "BR-1876", "name": "取付ブラケット", "mat": "SS400", "t": 6, "w": 280, "h": 190, "holes": 8, "bends": 2, "surf": "三価クロメート", "qty": 20, "setup": 2.0, "proc": 8.0, "matcost": 9800, "design": 3.0, "date": "2025/11", "cust": "D社"}, {"no": "CV-1861", "name": "カバー", "mat": "SUS304", "t": 1.5, "w": 350, "h": 220, "holes": 8, "bends": 4, "surf": "なし", "qty": 30, "setup": 3.2, "proc": 18.1, "matcost": 17500, "design": 3.5, "date": "2025/10", "cust": "C社"}, {"no": "FL-1823", "name": "フランジ", "mat": "SUS304", "t": 6, "w": 200, "h": 200, "holes": 6, "bends": 0, "surf": "なし", "qty": 20, "setup": 1.5, "proc": 6.0, "matcost": 24700, "design": 2.0, "date": "2025/10", "cust": "E社"}, {"no": "LK-1804", "name": "L金具", "mat": "SS400", "t": 4.5, "w": 180, "h": 120, "holes": 4, "bends": 1, "surf": "塗装", "qty": 80, "setup": 1.6, "proc": 16.0, "matcost": 11690, "design": 2.0, "date": "2025/09", "cust": "A社"}, {"no": "CV-1777", "name": "カバー", "mat": "A5052", "t": 2, "w": 400, "h": 250, "holes": 10, "bends": 4, "surf": "アルマイト", "qty": 25, "setup": 2.9, "proc": 16.8, "matcost": 12680, "design": 4.0, "date": "2025/08", "cust": "A社"}, {"no": "CV-1759", "name": "カバー", "mat": "SS400", "t": 3.2, "w": 380, "h": 260, "holes": 8, "bends": 3, "surf": "塗装", "qty": 15, "setup": 2.4, "proc": 7.7, "matcost": 7170, "design": 3.0, "date": "2025/08", "cust": "A社"}, {"no": "ST-1739", "name": "ステー", "mat": "SS400", "t": 6, "w": 300, "h": 50, "holes": 3, "bends": 2, "surf": "三価クロメート", "qty": 60, "setup": 1.9, "proc": 13.3, "matcost": 8560, "design": 2.5, "date": "2025/07", "cust": "F社"}, {"no": "BR-1712", "name": "取付ブラケット", "mat": "SS400", "t": 4.5, "w": 300, "h": 200, "holes": 6, "bends": 2, "surf": "三価クロメート", "qty": 30, "setup": 1.8, "proc": 11.9, "matcost": 11540, "design": 2.5, "date": "2025/06", "cust": "F社"}, {"no": "BP-1690", "name": "ベースプレート", "mat": "SS400", "t": 9, "w": 350, "h": 250, "holes": 6, "bends": 0, "surf": "三価クロメート", "qty": 12, "setup": 1.5, "proc": 4.1, "matcost": 13590, "design": 2.0, "date": "2025/05", "cust": "B社"}, {"no": "BR-1655", "name": "取付ブラケット", "mat": "A5052", "t": 5, "w": 240, "h": 160, "holes": 6, "bends": 2, "surf": "アルマイト", "qty": 20, "setup": 2.1, "proc": 6.3, "matcost": 9670, "design": 2.5, "date": "2025/04", "cust": "B社"}, {"no": "BR-1633", "name": "取付ブラケット", "mat": "SS400", "t": 9, "w": 260, "h": 180, "holes": 8, "bends": 2, "surf": "三価クロメート", "qty": 10, "setup": 1.8, "proc": 4.7, "matcost": 6310, "design": 2.5, "date": "2025/03", "cust": "E社"}, {"no": "BR-1611", "name": "取付ブラケット", "mat": "SS400", "t": 6, "w": 300, "h": 200, "holes": 8, "bends": 3, "surf": "塗装", "qty": 25, "setup": 2.2, "proc": 12.4, "matcost": 13260, "design": 3.0, "date": "2025/02", "cust": "E社"}, {"no": "LK-1588", "name": "L金具", "mat": "SS400", "t": 6, "w": 200, "h": 150, "holes": 4, "bends": 1, "surf": "三価クロメート", "qty": 50, "setup": 1.7, "proc": 11.5, "matcost": 12070, "design": 2.0, "date": "2024/12", "cust": "B社"}, {"no": "ST-1544", "name": "ステー", "mat": "SS400", "t": 4.5, "w": 250, "h": 40, "holes": 2, "bends": 1, "surf": "三価クロメート", "qty": 100, "setup": 1.8, "proc": 14.4, "matcost": 6480, "design": 1.5, "date": "2024/11", "cust": "D社"}, {"no": "CV-1502", "name": "カバー", "mat": "SS400", "t": 2.3, "w": 450, "h": 300, "holes": 12, "bends": 4, "surf": "塗装", "qty": 20, "setup": 2.8, "proc": 14.8, "matcost": 8230, "design": 3.5, "date": "2024/10", "cust": "A社"}, {"no": "FL-1466", "name": "フランジ", "mat": "SS400", "t": 9, "w": 250, "h": 250, "holes": 8, "bends": 0, "surf": "塗装", "qty": 15, "setup": 1.5, "proc": 5.1, "matcost": 11860, "design": 1.5, "date": "2024/09", "cust": "E社"}, {"no": "BP-1421", "name": "ベースプレート", "mat": "SS400", "t": 12, "w": 400, "h": 300, "holes": 8, "bends": 0, "surf": "塗装", "qty": 10, "setup": 1.4, "proc": 4.5, "matcost": 19460, "design": 1.5, "date": "2024/08", "cust": "F社"}];
 const NEW = {no:"NB-3120", name:"取付ブラケット", mat:"SS400", t:6, w:300, h:200, holes:8, bends:2, surf:"三価クロメート", qty:20};
@@ -239,19 +422,73 @@ const yen = v => Math.round(v/100)*100;
 const fmtY = v => yen(v).toLocaleString("ja-JP");
 const f1 = v => (Math.round(v*10)/10).toFixed(1);
 const area = r => r.w*r.h/1e6;
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const SCORE_MAX = 12;
+const XLNAME = "過去案件一覧_TECHS出力.xlsx";
+const pdfName = r => r.no===NEW.no ? "NB-3120_取付ブラケット.pdf" : `${r.no}.pdf`;
+
+/* ---- アイコン ---- */
+const P = {
+  bell:'<path d="M10 3a4 4 0 0 0-4 4v3l-1.5 3h11L14 10V7a4 4 0 0 0-4-4zM8.2 15.5a1.9 1.9 0 0 0 3.6 0"/>',
+  chat:'<path d="M3.5 5.5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8l-4.5 3z"/>',
+  team:'<circle cx="8" cy="7" r="2.6"/><path d="M3.3 15.5c.5-2.6 2.4-4.2 4.7-4.2s4.2 1.6 4.7 4.2"/><circle cx="14.2" cy="7.8" r="2"/><path d="M13.6 11.4c1.7.2 2.9 1.5 3.2 3.4"/>',
+  cal:'<rect x="3.5" y="4.5" width="13" height="12" rx="2"/><path d="M3.5 8.5h13M7 3v3M13 3v3"/>',
+  call:'<path d="M6.2 3.6l2 3.1-1.5 1.5c.8 1.8 2.2 3.2 4 4l1.5-1.5 3.1 2-1 2.6C9.3 15.3 4.7 10.7 3.6 4.6z"/>',
+  cloud:'<path d="M6 15.5h8.4a3 3 0 0 0 .2-6 4.5 4.5 0 0 0-8.7 1A2.5 2.5 0 0 0 6 15.5z"/>',
+  apps:'<rect x="3.5" y="3.5" width="5" height="5" rx="1"/><rect x="11.5" y="3.5" width="5" height="5" rx="1"/><rect x="3.5" y="11.5" width="5" height="5" rx="1"/><rect x="11.5" y="11.5" width="5" height="5" rx="1"/>',
+  clip:'<path d="M14.5 9.5l-5 5a3 3 0 0 1-4.2-4.2l5.6-5.6a2 2 0 0 1 2.8 2.8l-5.4 5.4a1 1 0 0 1-1.4-1.4l4.9-4.9"/>',
+  send:'<path d="M3.5 10l13-6.2-4.2 13.2-3-5.2z"/><path d="M9.3 11.8l7.2-8"/>',
+  srch:'<circle cx="9" cy="9" r="5"/><path d="M13 13l4 4"/>',
+  back:'<path d="M12 4l-6 6 6 6"/>', fwd:'<path d="M8 4l6 6-6 6"/>',
+  dots:'<circle cx="5" cy="10" r=".6"/><circle cx="10" cy="10" r=".6"/><circle cx="15" cy="10" r=".6"/>',
+  filt:'<path d="M4 5h12M6.5 10h7M9 15h2"/>', edit:'<path d="M4 16l1-4 8-8 3 3-8 8z"/>',
+  vid:'<rect x="3" y="6" width="10" height="8" rx="1.5"/><path d="M13 9l4-2v6l-4-2"/>',
+  ppl:'<circle cx="10" cy="7" r="3"/><path d="M4.5 16c.6-3 2.8-5 5.5-5s4.9 2 5.5 5"/>',
+  waf:'<circle cx="5" cy="5" r=".7"/><circle cx="10" cy="5" r=".7"/><circle cx="15" cy="5" r=".7"/><circle cx="5" cy="10" r=".7"/><circle cx="10" cy="10" r=".7"/><circle cx="15" cy="10" r=".7"/><circle cx="5" cy="15" r=".7"/><circle cx="10" cy="15" r=".7"/><circle cx="15" cy="15" r=".7"/>',
+  home:'<path d="M3.5 9L10 3.5 16.5 9v7.5h-4.5v-5h-4v5H3.5z"/>', plus:'<path d="M10 4v12M4 10h12"/>',
+  up:'<path d="M10 15V5M5.5 9.5L10 5l4.5 4.5"/>', share:'<path d="M12 4.5l4 4-4 4M16 8.5H9a4 4 0 0 0-4 4V15"/>',
+  sync:'<path d="M15.5 8A6 6 0 0 0 5 6.5M4.5 12A6 6 0 0 0 15 13.5M15.5 4v4h-4M4.5 16v-4h4"/>',
+  flow:'<circle cx="5" cy="5" r="2"/><circle cx="15" cy="15" r="2"/><path d="M7 5h4a2 2 0 0 1 2 2v6"/>',
+  tool:'<path d="M12.5 3.5a3.5 3.5 0 0 0-3.3 4.7L3.5 14l2.5 2.5 5.8-5.7a3.5 3.5 0 0 0 4.7-3.3l-2 2-2.3-.4-.4-2.3z"/>',
+  lib:'<path d="M4 4h3v12H4zM8.5 4h3v12h-3zM13 4.5l2.8-.7 2.5 11.5-2.8.7z"/>',
+  spark:'<path d="M10 1.8l1.9 5.3 5.3 1.9-5.3 1.9L10 16.2l-1.9-5.3L2.8 9l5.3-1.9z"/>'
+};
+const ic = (k,cls="i") => `<svg class="${cls}" viewBox="0 0 20 20">${P[k]}</svg>`;
+const agentIcon = () => `<svg viewBox="0 0 20 20">${P.spark}</svg>`;
+
+function chrome(){
+  $("#tnav").innerHTML = ic("back")+ic("fwd");
+  $("#tsearch").innerHTML = ic("srch")+"検索";
+  $("#tdots").innerHTML = ic("dots");
+  const rail=[["bell","アクティビティ"],["chat","チャット",1],["team","Teams"],["cal","カレンダー"],["call","通話"],["cloud","OneDrive"],["apps","アプリ"]];
+  $("#trail").innerHTML = rail.map(r=>`<div class="ri ${r[2]?"on":""}">${ic(r[0])}<span>${r[1]}</span></div>`).join("");
+  $("#tlistic").innerHTML = ic("filt")+ic("edit");
+  $("#tchr").innerHTML = ic("vid")+ic("ppl")+ic("dots");
+  ["#av1","#av2","#av3"].forEach(s=>$(s).innerHTML=agentIcon());
+  $("#bAttach").innerHTML = ic("clip"); $("#bSend").innerHTML = ic("send");
+  $("#cswf").innerHTML = ic("waf");
+  const csn=[["home","ホーム"],["plus","作成"],["spark","エージェント",1],["flow","フロー"],["tool","ツール"],["lib","ライブラリ"]];
+  $("#csnav").innerHTML = csn.map(r=>`<div class="ri ${r[2]?"on":""}">${ic(r[0])}<span>${r[1]}</span></div>`).join("");
+  $("#instr").textContent = `あなたは板金加工の見積担当者を手伝うアシスタントです。
+1. 図面（PDF）を受け取ったら、トピック「概算を作成」を使う。
+2. 図面の表題欄と寸法から、図番・品名・材質・板厚・展開寸法・穴・曲げ・表面処理を読み取る。読み取れない項目は推測せず「要確認」とする。
+3. 似た案件の選定と概算の計算は、ツール「類似案件の検索と概算」の結果だけを使う。自分で数字を作らない。
+4. 回答には、根拠にした過去案件の図番と参照元を必ず添える。
+5. 最終的な見積金額は、担当者と熟練工が確認して決めることを伝える。`;
+}
 
 /* ---- 似た案件の検索（文字と数値の条件） ---- */
 function similar(inp){
   return DATA.map(r=>{
     let s=0, tags=[];
-    if(r.name===inp.name){s+=3;tags.push(["品名一致",0]);}
-    if(r.mat===inp.mat){s+=2;tags.push(["材質一致",0]);}
-    const dt=Math.abs(r.t-inp.t);
-    if(dt===0){s+=3;tags.push(["板厚一致",0]);} else if(dt<=1.5){s+=2;tags.push([`板厚±${dt}`,1]);} else if(dt<=3){s+=1;tags.push([`板厚±${dt}`,1]);}
-    if(r.bends===inp.bends){s+=1;tags.push(["曲げ数一致",0]);}
-    if(Math.abs(r.holes-inp.holes)<=2){s+=1;tags.push(["穴数近い",0]);}
-    const ar=area(r)/area(inp); if(ar>0.7&&ar<1.3){s+=1;tags.push(["外形近い",0]);}
-    if(r.surf===inp.surf){s+=1;tags.push(["表面処理一致",0]);}
+    if(r.name===inp.name){s+=3;tags.push(["品名",0]);}
+    if(r.mat===inp.mat){s+=2;tags.push(["材質",0]);}
+    const dt=Math.round(Math.abs(r.t-inp.t)*10)/10;
+    if(dt===0){s+=3;tags.push(["板厚",0]);} else if(dt<=1.5){s+=2;tags.push([`板厚±${dt}`,1]);} else if(dt<=3){s+=1;tags.push([`板厚±${dt}`,1]);}
+    if(r.bends===inp.bends){s+=1;tags.push(["曲げ数",0]);}
+    if(Math.abs(r.holes-inp.holes)<=2){s+=1;tags.push(["穴数",0]);}
+    const ar=area(r)/area(inp); if(ar>0.7&&ar<1.3){s+=1;tags.push(["外形",0]);}
+    if(r.surf===inp.surf){s+=1;tags.push(["表面処理",0]);}
     return {...r,score:s,tags};
   }).filter(r=>r.mat===inp.mat).sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date)).slice(0,5);
 }
@@ -269,211 +506,337 @@ function calc(inp, cases){
   return {per, hours:[avg("hours"),mn("hours"),mx("hours")], mat:[avg("mat"),mn("mat"),mx("mat")], design:[avg("design"),mn("design"),mx("design")], setup:avg("setup"), unit:avg("unit")};
 }
 
-/* ---- 図面（SVG） ---- */
-function drawing(r, big){
-  const W=big?520:300, H=big?330:190, s=big?1:0.58;
-  const pw=Math.min(300, r.w*0.9)*s, ph=Math.min(170, r.h*0.75)*s, x0=40*s, y0=34*s;
-  let holes="";
-  const n=Math.max(2,r.holes), cols=Math.ceil(n/2);
-  for(let i=0;i<n;i++){const c=i%cols, rr=Math.floor(i/cols);
-    holes+=`<circle cx="${x0+pw*(c+0.5)/cols}" cy="${y0+ph*(rr?0.78:0.22)}" r="${5*s}" fill="none" stroke="#333" stroke-width="1"/>`;}
-  let bends=""; for(let i=1;i<=r.bends;i++){const bx=x0+pw*i/(r.bends+1); bends+=`<line x1="${bx}" y1="${y0}" x2="${bx}" y2="${y0+ph}" stroke="#d2531e" stroke-dasharray="5 4" stroke-width="1"/>`;}
-  const fs=big?11:8;
-  return `<svg class="drawing" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
-  <rect x="2" y="2" width="${W-4}" height="${H-4}" fill="#fff" stroke="#555"/>
-  <rect x="${x0}" y="${y0}" width="${pw}" height="${ph}" fill="#fbfbfb" stroke="#222" stroke-width="1.4"/>${holes}${bends}
-  <line x1="${x0}" y1="${y0+ph+14*s}" x2="${x0+pw}" y2="${y0+ph+14*s}" stroke="#555" stroke-width=".8"/>
-  <text x="${x0+pw/2}" y="${y0+ph+26*s}" font-size="${fs}" text-anchor="middle">${r.w}</text>
-  <line x1="${x0+pw+14*s}" y1="${y0}" x2="${x0+pw+14*s}" y2="${y0+ph}" stroke="#555" stroke-width=".8"/>
-  <text x="${x0+pw+20*s}" y="${y0+ph/2}" font-size="${fs}">${r.h}</text>
-  <g transform="translate(${W-(big?200:118)},${H-(big?78:48)})">
-   <rect width="${big?196:114}" height="${big?74:44}" fill="#fff" stroke="#555"/>
-   <text x="6" y="${big?16:11}" font-size="${fs}">図番 ${r.no}</text>
-   <text x="6" y="${big?32:21}" font-size="${fs}">品名 ${r.name}</text>
-   <text x="6" y="${big?48:31}" font-size="${fs}">材質 ${r.mat}　t${r.t}</text>
-   <text x="6" y="${big?64:41}" font-size="${fs}">表面処理 ${r.surf}</text>
-  </g>
-  <text x="${x0}" y="${big?22:16}" font-size="${fs}" fill="#d2531e">曲げ ${r.bends}箇所（破線）／穴 ${r.holes}箇所</text>
-  </svg>`;
+/* ---- 図面（CAD から出力した PDF のイメージ） ---- */
+function dwg(r){
+  const W=840,H=594, s=Math.min(330/r.w,230/r.h), x0=70, y0=118, w=r.w*s, h=r.h*s;
+  const L=(x1,y1,x2,y2,a="")=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-width="0.7" ${a}/>`;
+  const T=(x,y,t,sz=11,an="start",wt=400,c="#111")=>`<text x="${x}" y="${y}" font-size="${sz}" text-anchor="${an}" font-weight="${wt}" fill="${c}">${t}</text>`;
+  const g=[];
+  g.push(`<defs><marker id="ar" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1.5L10 5L0 8.5z" fill="#111"/></marker></defs>`);
+  g.push(`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/><rect x="10" y="10" width="${W-20}" height="${H-20}" fill="none" stroke="#111" stroke-width="1.4"/>`);
+  g.push(T(x0,y0-58,"展開図",13,"start",700));
+  g.push(`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="none" stroke="#111" stroke-width="1.6"/>`);
+  for(let i=1;i<=r.bends;i++){const bx=x0+w*i/(r.bends+1); g.push(`<line x1="${bx}" y1="${y0-8}" x2="${bx}" y2="${y0+h+8}" stroke="#c0392b" stroke-width="1" stroke-dasharray="10 3 2 3"/>`);}
+  const rows=r.holes>=4?2:1, n=Math.ceil(r.holes/rows), hr=Math.max(3,5.5*s);
+  const hx=j=>x0+w*(j+0.5)/n, hy=i=>rows===1?y0+h/2:y0+h*(i===0?0.22:0.78);
+  let k=0;
+  for(let i=0;i<rows;i++) for(let j=0;j<n;j++){ if(k++>=r.holes) break;
+    g.push(`<circle cx="${hx(j)}" cy="${hy(i)}" r="${hr}" fill="none" stroke="#111" stroke-width="1.1"/>`+L(hx(j)-hr-4,hy(i),hx(j)+hr+4,hy(i),'stroke-dasharray="5 2 1 2" stroke-width="0.5"')+L(hx(j),hy(i)-hr-4,hx(j),hy(i)+hr+4,'stroke-dasharray="5 2 1 2" stroke-width="0.5"')); }
+  const dy=y0+h+34;
+  g.push(L(x0,y0+h+4,x0,dy+4)+L(x0+w,y0+h+4,x0+w,dy+4)+L(x0,dy,x0+w,dy,'marker-start="url(#ar)" marker-end="url(#ar)"')+T(x0+w/2,dy-4,r.w,12,"middle"));
+  const dx=x0+w+34;
+  g.push(L(x0+w+4,y0,dx+4,y0)+L(x0+w+4,y0+h,dx+4,y0+h)+L(dx,y0,dx,y0+h,'marker-start="url(#ar)" marker-end="url(#ar)"')+`<text x="${dx-5}" y="${y0+h/2}" font-size="12" text-anchor="middle" transform="rotate(-90 ${dx-5} ${y0+h/2})">${r.h}</text>`);
+  if(n>1){ const py=y0-20, p=Math.round(r.w/n*10)/10, e=Math.round(r.w/n/2*10)/10;
+    g.push(L(hx(0),hy(0)-hr-2,hx(0),py-4)+L(hx(1),hy(0)-hr-2,hx(1),py-4)+L(x0,y0-2,x0,py-4)+L(hx(0),py,hx(1),py,'marker-start="url(#ar)" marker-end="url(#ar)"')+T((hx(0)+hx(1))/2,py-4,p,11,"middle")+L(x0,py,hx(0),py,'marker-start="url(#ar)" marker-end="url(#ar)"')+T((x0+hx(0))/2,py-4,e,10,"middle")); }
+  const lx=hx(n-1)+hr*0.7, ly=hy(0)-hr*0.7;
+  g.push(L(lx,ly,x0+w+18,y0-40)+L(x0+w+18,y0-40,x0+w+92,y0-40)+T(x0+w+22,y0-44,`${r.holes}-φ11 キリ`,12,"start",600));
+  if(r.bends) g.push(T(x0+w/(r.bends+1)+6,y0+h+20,`曲げ ${r.bends}箇所　山 90°　内R${r.t}`,10.5,"start",600,"#c0392b"));
+  // 曲げ後（参考）
+  const sx=x0+w+130, sy=y0+30, ps=0.42, seg=r.w*s*ps/(r.bends+1), fl=Math.min(seg,70), sw=Math.max(2.2,r.t*s*0.55);
+  g.push(T(sx,y0-58,"曲げ後（参考）",13,"start",700));
+  let pts;
+  if(r.bends===0) pts=[[sx,sy+40],[sx+w*ps,sy+40]];
+  else if(r.bends===1) pts=[[sx,sy],[sx,sy+fl],[sx+seg*1.6,sy+fl]];
+  else if(r.bends===2) pts=[[sx,sy],[sx,sy+fl],[sx+seg*1.4,sy+fl],[sx+seg*1.4,sy]];
+  else pts=[[sx,sy],[sx,sy+fl],[sx+seg,sy+fl],[sx+seg,sy+fl*0.3],[sx+seg*1.8,sy+fl*0.3]];
+  g.push(`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#111" stroke-width="${sw}" stroke-linejoin="round"/>`);
+  g.push(T(pts[pts.length-1][0]+10,pts[pts.length-1][1]+4,`t${r.t}`,11));
+  if(r.bends) g.push(T(sx,sy+fl+26,`90°（${r.bends}箇所）`,10.5,"start",400,"#c0392b"));
+  // 注記
+  const ny=H-128;
+  g.push(T(30,ny,"注記",12,"start",700)+T(30,ny+18,"1. 指示なき角は C0.5")+T(30,ny+34,"2. バリ・カエリなきこと")+T(30,ny+50,"3. 普通公差は JIS B 0405 中級")+T(30,ny+66,"4. 曲げ内R は板厚と同じ")+T(30,ny+82,`5. 表面処理：${r.surf}`));
+  // 表題欄
+  const tx=W-10-340, ty=H-10-128, cw=[64,126,50,100], rh=25.6;
+  g.push(`<rect x="${tx}" y="${ty}" width="340" height="128" fill="none" stroke="#111" stroke-width="1.2"/>`);
+  const rowsT=[["品名",r.name,"図番",r.no],["材質",r.mat,"板厚",`t${r.t}`],["表面処理",r.surf,"尺度","1:2"],["投影法","第三角法","日付","2026/10"]];
+  rowsT.forEach((row,i)=>{ const y=ty+i*rh; if(i) g.push(L(tx,y,tx+340,y,'stroke-width="0.8"')); let x=tx;
+    row.forEach((c,j)=>{ if(j) g.push(L(x,y,x,y+rh,'stroke-width="0.8"')); g.push(T(x+5,y+17,c,j%2?12.5:10,"start",j%2?600:400,j%2?"#111":"#555")); x+=cw[j]; }); });
+  const by=ty+4*rh; g.push(L(tx,by,tx+340,by,'stroke-width="0.8"'));
+  ["作成","検図","承認"].forEach((c,j)=>{ const x=tx+j*56; if(j) g.push(L(x,by,x,by+rh,'stroke-width="0.8"')); g.push(T(x+5,by+16,c,10,"start",400,"#555")); });
+  g.push(L(tx+168,by,tx+168,by+rh,'stroke-width="0.8"')+T(tx+176,by+17,"サンプル製作所",12,"start",700));
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','Hiragino Sans',sans-serif">${g.join("")}</svg>`;
 }
 
-/* ---- チャット ---- */
-const msgs=$("#msgs");
-function add(html, me){
-  const row=document.createElement("div"); row.className="row"+(me?" me":"");
-  row.innerHTML=`<div class="av ${me?"me":""}">${me?"担":"見"}</div><div class="bub"><div class="meta">${me?"営業・技術 担当者":"見積AI"}　${new Date().toTimeString().slice(0,5)}</div>${html}</div>`;
-  msgs.appendChild(row); msgs.scrollTop=msgs.scrollHeight; return row;
+/* ================= Teams のチャット ================= */
+const msgs = $("#msgs");
+let cur=null, lastRun=null, attached=false, cid=0;
+const nowT = () => { const d=new Date(); return `${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`; };
+const end = () => { msgs.scrollTop = msgs.scrollHeight; };
+function agentMsg(inner,{ai=false}={}){
+  const el=document.createElement("div"); el.className="m in";
+  el.innerHTML=`<div class="agav">${agentIcon()}</div><div class="mb"><div class="mh"><b>見積AI</b><span>${nowT()}</span>${ai?'<span class="ai">AI 生成</span>':""}</div>${inner}</div>`;
+  msgs.appendChild(el); $("#lt1").textContent=nowT(); end(); return el;
+}
+function userMsg(inner){
+  const el=document.createElement("div"); el.className="m out";
+  el.innerHTML=`<div class="mb"><div class="mh"><span>${nowT()}</span></div>${inner}</div>`;
+  msgs.appendChild(el); end(); return el;
+}
+function typing(ms,cb){
+  const el=document.createElement("div"); el.className="m in";
+  el.innerHTML=`<div class="agav">${agentIcon()}</div><div class="mb"><div class="bub typing"><i></i><i></i><i></i></div></div>`;
+  msgs.appendChild(el); end(); setTimeout(()=>{ el.remove(); cb(); }, ms);
 }
 function sugg(list){
-  const box=$("#sugg"); box.innerHTML="";
-  list.forEach(([label,fn])=>{const b=document.createElement("button"); b.className="sg"; b.textContent=label; b.onclick=()=>{box.querySelectorAll("button").forEach(x=>x.disabled=true); fn();}; box.appendChild(b);});
+  const box=$("#sugg"); box.innerHTML=list.map(s=>`<button>${s[0]}</button>`).join("");
+  box.querySelectorAll("button").forEach((b,i)=>b.onclick=list[i][1]);
 }
-function thinking(stepsArr, done){
-  const row=add(`<div class="typing"><span class="dots"><span></span><span></span><span></span></span><span>考えています…</span></div><ol class="steps">${stepsArr.map(s=>`<li>${s}</li>`).join("")}</ol>`);
-  const lis=row.querySelectorAll("li"); let i=0;
-  const tick=()=>{ if(i<lis.length){lis[i].classList.add("done"); lis[i].textContent="✓ "+lis[i].textContent; i++; msgs.scrollTop=msgs.scrollHeight; setTimeout(tick,650);} else {row.remove(); done();} };
-  setTimeout(tick,500);
-}
+const fileCard = (r,big) => `<div class="file" onclick="openViewer('${r.no}')"><div class="fic pdf ${big?"big":""}">PDF</div><div><div class="fn">${pdfName(r)}</div><div class="fs">${r.no===NEW.no?"182 KB":"SharePoint・図面PDF"}</div></div></div>`;
+const refs = list => `<div class="refs open"><button class="rt" onclick="this.parentNode.classList.toggle('open')">参照 ${list.length} 件 ▾</button><div class="rl">${list.map((x,i)=>`<div class="rr" onclick="${x.go}"><span class="n">${i+1}</span><div class="fic ${x.k}">${x.k==="xl"?"XLS":"PDF"}</div>${x.name}</div>`).join("")}</div></div>`;
+const cit = (n,go) => `<sup class="cit" onclick="${go}">${n}</sup>`;
 
-function answer(inp, title){
-  const cases=similar(inp), c=calc(inp,cases);
-  const facts=[["図番",inp.no],["品名",inp.name],["材質",inp.mat],["板厚",`t${inp.t}`],["外形",`${inp.w}×${inp.h}`],["穴",`${inp.holes}箇所`],["曲げ",`${inp.bends}箇所`],["表面処理",inp.surf],["数量",`${inp.qty}個`],["区分","新規図面"]];
-  const rows=cases.map((r,i)=>`<tr><td><b>${r.no}</b><span class="cite">${i+2}</span><br><span style="color:var(--sub);font-size:11.5px">${r.name}・${r.date}</span></td>
-    <td>${r.mat} t${r.t}<br><span style="color:var(--sub);font-size:11.5px">${r.w}×${r.h}／穴${r.holes}・曲げ${r.bends}</span></td>
-    <td class="n">${r.qty}個</td><td class="n">${f1(r.setup+r.proc)}h</td><td class="n">${r.matcost.toLocaleString("ja-JP")}円</td><td class="n">${r.design.toFixed(1)}h</td>
-    <td>${r.tags.map(t=>`<span class="tag ${t[1]?"diff":""}">${t[0]}</span>`).join("")}</td></tr>`).join("");
-  const perRows=c.per.map(p=>`<tr><td>${p.no}</td><td class="n">${f1(p.setup)}h</td><td class="n">${p.unit.toFixed(2)}h</td><td class="n">${f1(p.hours)}h</td><td class="n">${fmtY(p.mat)}円</td><td class="n">${f1(p.design)}h</td></tr>`).join("");
-  const thick=cases.filter(r=>r.t>=inp.t).length, maxT=Math.max(...cases.map(r=>r.t));
-  const notes=[];
-  if(inp.t>=maxT) notes.push(`板厚 t${inp.t} は、似た案件の中で最も厚い側です。曲げの段取りと加工時間が概算より増える可能性があります。`);
-  else notes.push(`板厚 t${inp.t} は、似た案件（t${Math.min(...cases.map(r=>r.t))}〜t${maxT}）の範囲内です。`);
-  const qs=cases.map(r=>r.qty), qmin=Math.min(...qs), qmax=Math.max(...qs);
-  if(inp.qty>qmax) notes.push(`数量 ${inp.qty}個 は、似た案件の数量（${qmin}〜${qmax}個）より多いため、1個あたりの段取りの比率は下がります。段取りは別に計算しています。`);
-  notes.push("材料費は受注した時期で単価が違います（2024年より2026年の案件が高め）。直近の案件に近い金額を目安にしてください。");
-  notes.push("表面処理（外注）の費用は、過去案件の一覧に列がないため概算に含めていません。");
-  notes.push("最終的な見積金額は、熟練工の方の確認のうえで決めてください。");
-  return `${title?`<div style="font-weight:700;margin-bottom:4px">${title}</div>`:""}
-  <div class="sec"><h4>① 図面から読み取った内容</h4><div class="facts">${facts.map(f=>`<div class="fact"><div class="k">${f[0]}</div><div class="v">${f[1]}</div></div>`).join("")}</div></div>
-  <div class="sec"><h4>② 似た過去案件（5件）</h4><div style="overflow-x:auto"><table class="t"><tr><th>図番</th><th>材質・形状</th><th>数量</th><th>実績工数</th><th>材料費</th><th>設計</th><th>一致した条件</th></tr>${rows}</table></div></div>
-  <div class="sec"><h4>③ 概算（数量 ${inp.qty}個）</h4><div class="est">
-    <div class="ebox"><div class="k">加工工数（段取り＋加工）</div><div class="v">${f1(c.hours[0])}<span class="u">時間</span></div><div class="r">幅 ${f1(c.hours[1])}〜${f1(c.hours[2])}時間</div></div>
-    <div class="ebox"><div class="k">材料費</div><div class="v">${fmtY(c.mat[0])}<span class="u">円</span></div><div class="r">幅 ${fmtY(c.mat[1])}〜${fmtY(c.mat[2])}円</div></div>
-    <div class="ebox"><div class="k">設計時間</div><div class="v">${f1(c.design[0])}<span class="u">時間</span></div><div class="r">幅 ${f1(c.design[1])}〜${f1(c.design[2])}時間</div></div>
-  </div></div>
-  <div class="sec"><details><summary>計算の根拠を表示</summary>
-    <p style="font-size:12.5px;margin:6px 0">似た5件それぞれの実績を、今回の条件に合わせて直してから平均しています。</p>
-    <ul style="font-size:12.5px;margin:0 0 8px;padding-left:18px">
-      <li>段取り：実績の段取り時間 ＋ 曲げ1箇所の差あたり 0.35時間</li>
-      <li>1個あたり加工：実績の加工時間 ÷ 数量 × 板厚の差（1mmあたり8%）× 外形の大きさの差</li>
-      <li>材料費：実績の1個あたり材料費を、外形×板厚の比で直す</li>
-      <li>設計時間：実績 ＋ 曲げ1箇所の差あたり 0.4時間</li>
-    </ul>
-    <div style="overflow-x:auto"><table class="t"><tr><th>根拠の案件</th><th>段取り</th><th>1個あたり加工</th><th>加工工数</th><th>材料費</th><th>設計</th></tr>${perRows}</table></div>
-    <p style="font-size:11.5px;color:var(--sub);margin:6px 0 0">補正の係数は例です。実際の係数は要件定義で熟練工の方と決めます。</p>
-  </details></div>
-  <div class="sec"><h4>④ 確認していただきたい点</h4><ul class="note" style="margin:0;padding-left:18px;font-size:13px">${notes.map(n=>`<li>${n}</li>`).join("")}</ul></div>
-  <div class="refs">参照：<span class="cite">1</span> <a onclick="openSP('xl')">過去案件一覧_TECHS出力.xlsx</a>　${cases.map((r,i)=>`<span class="cite">${i+2}</span> <a onclick="openSP('pdf','${r.no}')">${r.no}.pdf</a>`).join("　")}</div>
-  <div class="aigen">AI で生成されたコンテンツは誤りを含む可能性があります。</div>`;
-}
-
-let cur={...NEW};
 function start(){
-  msgs.innerHTML="";
-  add(`<div>こんにちは。見積AIです。<br>図面（PDF・画像）と仕様を送っていただくと、過去の似た案件の実績から <b>工数・材料費・設計時間の概算</b> を、根拠の案件と一緒にお出しします。</div>
-  <div class="start sec"><b>試してみる</b><div style="font-size:12.5px;color:var(--sub)">デモ用の図面（架空）を添付して送信します。</div>
-  <div class="btns"><button class="sg" onclick="step1()">📎 サンプル図面 NB-3120.pdf を添付して送信</button></div></div>`);
-  sugg([["📎 サンプル図面を添付して概算を依頼", step1]]);
+  msgs.innerHTML='<div class="day">今日</div>'; cur=null; lastRun=null; detach(); renderAct();
+  $("#lpv").textContent="図面（PDF）を添付して送ってください";
+  agentMsg(`<div class="bub"><p>こんにちは。見積AIです。</p><p>図面（PDF）を添付し、数量などの条件を書いて送ってください。過去案件の実績から、加工工数・材料費・設計時間の概算と、その根拠をお出しします。</p></div>`);
+  sugg([["📎 サンプル図面を添付する", attachSample],["この図面の概算をお願いします", attachSample]]);
 }
-function step1(){
-  cur={...NEW};
-  $("#sugg").innerHTML="";
-  add(`この図面の概算をお願いします。数量は ${cur.qty}個、表面処理は三価クロメートです。
-  <div class="att open" onclick="openViewer()"><div class="fi">PDF</div><div><div class="fn">NB-3120_取付ブラケット.pdf</div><div class="fs">PDF・1ページ・182 KB<span class="op">クリックで開く</span></div></div></div>`, true);
-  thinking(["図面を読み取っています（品名・材質・寸法・加工）","SharePoint の過去案件から似た案件を探しています","実績から概算を計算しています"], ()=>{
-    add(answer(cur));
-    nextSugg();
+function attachSample(){
+  attached=true; $("#chip").hidden=false;
+  $("#inp").value="この図面の概算をお願いします。数量は20個、表面処理は三価クロメートです。";
+  $("#bSend").classList.add("pulse"); sugg([]); $("#inp").focus();
+}
+function detach(){ attached=false; $("#chip").hidden=true; $("#bSend").classList.remove("pulse"); }
+function send(){
+  const text=$("#inp").value.trim();
+  if(!text && !attached) return;
+  $("#inp").value=""; $("#bSend").classList.remove("pulse");
+  if(attached){
+    userMsg(`${text?`<div class="bub me">${esc(text)}</div>`:""}${fileCard(NEW)}`);
+    detach(); runEstimate(); return;
+  }
+  userMsg(`<div class="bub me">${esc(text)}</div>`); route(text);
+}
+$("#bSend").onclick=send; $("#bAttach").onclick=attachSample;
+$("#inp").addEventListener("keydown",e=>{ if(e.key==="Enter" && !e.isComposing){ e.preventDefault(); send(); } });
+
+function compute(inp){ const cases=similar(inp), c=calc(inp,cases); lastRun={inp:{...inp},cases,c}; renderAct(); return {cases,c}; }
+function runEstimate(){
+  cur={...NEW}; sugg([]);
+  agentMsg(`<div class="bub">図面を受け取りました。図面の読み取りと、過去案件からの計算を行います。少しお待ちください。</div>`);
+  typing(3400,()=>{
+    const res=compute(cur);
+    agentMsg(`<div class="bub">図面 <b>${cur.no}</b> を読み取り、過去案件 ${DATA.length}件から似た案件を5件選んで概算しました。${cit(1,"openSP('xl')")}${cit(2,`openViewer('${NEW.no}')`)}</div>${card(cur,res)}`,{ai:true});
+    $("#lpv").textContent="概算結果をお送りしました"; afterAnswer();
   });
 }
-function nextSugg(){
+function recalc(chg,msg){
+  if(!cur){ typing(1000,()=>agentMsg(`<div class="bub">先に図面（PDF）を添付してください。</div>`)); return; }
+  cur={...cur,...chg}; sugg([]);
+  typing(2600,()=>{ const res=compute(cur); agentMsg(`<div class="bub">${msg}</div>${card(cur,res)}`,{ai:true}); afterAnswer(); });
+}
+function afterAnswer(){
   sugg([
-    ["数量を50個にした場合は？", ()=>followQty(50)],
-    ["板厚を4.5mmにした場合は？", ()=>followT(4.5)],
-    ["いちばん近い案件の図面を見せて", followDrawing],
-    ["熟練工が確認すべき点は？", followCheck],
-    ["最初からやり直す", start],
+    ["数量を50個にした場合は？",()=>{userMsg(`<div class="bub me">数量を50個にした場合は？</div>`);recalc({qty:50},"数量 50個 で計算し直しました。");}],
+    ["板厚を4.5mmにした場合は？",()=>{userMsg(`<div class="bub me">板厚を4.5mmにした場合は？</div>`);recalc({t:4.5},"板厚 t4.5 で、似た案件を探し直して計算しました。");}],
+    ["いちばん近い案件の図面を見せて",()=>{userMsg(`<div class="bub me">いちばん近い案件の図面を見せて</div>`);drawingAns();}],
+    ["熟練工が確認すべき点は？",()=>{userMsg(`<div class="bub me">熟練工が確認すべき点は？</div>`);checkAns();}]
   ]);
 }
-function followQty(q){
-  add(`数量を ${q}個 にした場合は？`, true);
-  cur={...cur, qty:q};
-  thinking(["同じ5件の実績で、数量を変えて計算し直しています"], ()=>{ add(answer(cur, `数量 ${q}個 で計算し直しました。段取りは数量によらないため、1個あたりの工数は下がります。`)); nextSugg(); });
+function route(t){
+  const q=t.match(/(\d+)\s*(個|コ|pcs|枚|台)/i), th=t.match(/(?:板厚|t)\s*[=＝]?\s*(\d+(?:\.\d+)?)/i);
+  if(!cur && !q && !th){ typing(1200,()=>agentMsg(`<div class="bub">図面（PDF）を添付して、数量などの条件と一緒に送ってください。</div>`,{ai:true})); return; }
+  if(q||th){ const chg={}; if(q) chg.qty=+q[1]; if(th) chg.t=+th[1];
+    recalc(chg, `${q?`数量 ${chg.qty}個`:""}${q&&th?"・":""}${th?`板厚 t${chg.t}`:""} で${th?"、似た案件を探し直して":""}計算し直しました。`); return; }
+  if(/図面|見せ|開い/.test(t)) return drawingAns();
+  if(/確認|注意|熟練|リスク/.test(t)) return checkAns();
+  typing(1500,()=>agentMsg(`<div class="bub">この見積AIは、図面の概算と、根拠にした過去案件についてお答えします。数量や板厚を変えた計算もできます。</div>`,{ai:true}));
 }
-function followT(t){
-  add(`板厚を ${t}mm にした場合は？`, true);
-  cur={...cur, t};
-  thinking(["板厚の条件で、似た案件を探し直しています","実績から計算し直しています"], ()=>{ add(answer(cur, `板厚 t${t} で、似た案件を探し直して計算しました。`)); nextSugg(); });
-}
-function followDrawing(){
-  add("いちばん近い案件の図面を見せて", true);
-  const r=similar(cur)[0];
-  thinking(["SharePoint から図面を探しています"], ()=>{
-    add(`いちばん近いのは <b>${r.no}（${r.name}・${r.date}受注）</b> です。<span class="cite">2</span>
-    <div class="att open" onclick="openSP('pdf','${r.no}')"><div class="fi">PDF</div><div><div class="fn">${r.no}.pdf</div><div class="fs">SharePoint・見積AI参照用ライブラリ ＞ 図面PDF<span class="op">クリックで開く</span></div></div></div>
-    <div class="sec"><div class="facts">
-      <div class="fact"><div class="k">数量</div><div class="v">${r.qty}個</div></div>
-      <div class="fact"><div class="k">段取り</div><div class="v">${r.setup.toFixed(1)}h</div></div>
-      <div class="fact"><div class="k">加工</div><div class="v">${r.proc.toFixed(1)}h</div></div>
-      <div class="fact"><div class="k">材料費</div><div class="v">${r.matcost.toLocaleString("ja-JP")}円</div></div>
-      <div class="fact"><div class="k">設計</div><div class="v">${r.design.toFixed(1)}h</div></div>
-    </div></div>
-    <div class="refs">参照：<span class="cite">1</span> <a onclick="openSP('xl','${r.no}')">過去案件一覧_TECHS出力.xlsx</a>　<span class="cite">2</span> <a onclick="openSP('pdf','${r.no}')">${r.no}.pdf</a></div>
-    <div class="aigen">AI で生成されたコンテンツは誤りを含む可能性があります。</div>`);
-    nextSugg();
-  });
-}
-function followCheck(){
-  add("熟練工が確認すべき点は？", true);
-  const cs=similar(cur);
-  thinking(["似た案件との違いを整理しています"], ()=>{
-    add(`今回の図面と、似た案件との違いから、確認していただきたい点です。
-    <ol style="margin:6px 0 0;padding-left:20px;font-size:13px">
-      <li><b>曲げの段取り</b>：曲げ ${cur.bends}箇所・板厚 t${cur.t} の組み合わせで、金型の段取り替えが必要か</li>
-      <li><b>穴の位置精度</b>：穴 ${cur.holes}箇所のうち、曲げのあとに加工する穴があるか（過去案件 ${cs[0].no} では曲げ前に加工）</li>
-      <li><b>材料の取り方</b>：外形 ${cur.w}×${cur.h} を定尺材から何個取れるか（材料費は歩留まり25%増しで計算）</li>
-      <li><b>表面処理</b>：外注先と納期（概算には含めていません）</li>
-    </ol>
-    <div class="refs">参照：<span class="cite">1</span> <a onclick="openSP('xl')">過去案件一覧_TECHS出力.xlsx</a>　<span class="cite">2</span> <a onclick="openSP('pdf','${cs[0].no}')">${cs[0].no}.pdf</a></div>
-    <div class="aigen">AI で生成されたコンテンツは誤りを含む可能性があります。</div>`);
-    nextSugg();
-  });
-}
-$("#clip").onclick=()=>step1();
-$("#send").onclick=()=>{ const v=$("#inp").value.trim(); if(!v) return; $("#inp").value=""; add(v,true); setTimeout(()=>{add("デモでは、下に表示している候補からお選びください。実際の見積AIは、自由な文章での質問にも答えます。"); },400); };
-$("#inp").addEventListener("keydown",e=>{ if(e.key==="Enter" && !e.isComposing) $("#send").click(); });
 
-/* ---- SharePoint ---- */
-function openSP(f, no){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on", t.dataset.v==="sp"));
-  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on", v.id==="v-sp"));
-  showSP(f, no);
+function facts(inp){
+  return [["図番",inp.no,"表題欄"],["品名",inp.name,"表題欄"],["材質",inp.mat,"表題欄"],
+    ["板厚",`t${inp.t}`, inp.t===NEW.t?"表題欄":"メッセージで変更"],["展開寸法",`${inp.w} × ${inp.h}`,"寸法"],
+    ["穴",`${inp.holes}-φ11`,"寸法の指示"],["曲げ",`${inp.bends}箇所（90°・内R${inp.t}）`,"曲げ線と注記・要確認",1],
+    ["表面処理",inp.surf,"表題欄・注記"],["数量",`${inp.qty}個`, inp.qty===NEW.qty?"メッセージ":"メッセージで変更"]];
 }
-function showSP(f, no){
-  document.querySelectorAll(".spnav .f").forEach(x=>x.classList.toggle("on", x.dataset.f===f));
-  const m=$("#spmain");
-  const sync=`<div class="syncnote">QNAP の「AI連携フォルダ」から、QNAP 標準アプリ HBS 3 で毎晩 22:00 に同期（デモの設定例）。最終同期：今日 0:00</div>`;
-  if(f==="xl"){
-    const rows=DATA.map(r=>`<tr class="${r.no===no?"hl":""}"><td>${r.no}</td><td>${r.name}</td><td>${r.mat}</td><td class="n">${r.t}</td><td class="n">${r.w}</td><td class="n">${r.h}</td><td class="n">${r.holes}</td><td class="n">${r.bends}</td><td>${r.surf}</td><td class="n">${r.qty}</td><td class="n">${r.setup.toFixed(1)}</td><td class="n">${r.proc.toFixed(1)}</td><td class="n">${r.matcost.toLocaleString("ja-JP")}</td><td class="n">${r.design.toFixed(1)}</td><td>${r.date}</td><td>${r.cust}</td></tr>`).join("");
-    m.innerHTML=`<div class="crumb">見積AI参照用ライブラリ ＞ TECHS出力</div>${sync}
-    <table class="files"><tr><th>名前</th><th>更新日時</th><th>更新者</th></tr>
-    <tr><td><a>📊 過去案件一覧_TECHS出力.xlsx</a></td><td>今日 0:00</td><td>連携用アカウント</td></tr></table>
-    <div style="margin-top:14px"><div class="xlbar">Excel for the web ｜ 過去案件一覧_TECHS出力.xlsx（TECHS の帳票から出力した実績・架空）</div>
-    <div class="xlwrap"><table class="xl"><tr><th>図番</th><th>品名</th><th>材質</th><th>板厚</th><th>幅</th><th>高さ</th><th>穴数</th><th>曲げ数</th><th>表面処理</th><th>数量</th><th>段取(h)</th><th>加工(h)</th><th>材料費(円)</th><th>設計(h)</th><th>受注月</th><th>得意先</th></tr>${rows}</table></div></div>`;
-    const hl=m.querySelector("tr.hl"); if(hl) hl.scrollIntoView({block:"center"});
-  } else if(f==="pdf"){
-    const sel=DATA.find(r=>r.no===no)||DATA[0];
-    m.innerHTML=`<div class="crumb">見積AI参照用ライブラリ ＞ 図面PDF</div>${sync}
-    <div class="preview"><div style="flex:1;min-width:260px"><table class="files"><tr><th>名前</th><th>更新日時</th></tr>${DATA.map(r=>`<tr><td><a onclick="showSP('pdf','${r.no}')" style="${r.no===sel.no?"font-weight:700":""}">📄 ${r.no}.pdf</a></td><td>${r.date}</td></tr>`).join("")}</table></div>
-    <div><div style="font-size:12.5px;color:var(--sub);margin-bottom:6px">プレビュー：${sel.no}.pdf</div>${drawing(sel,true)}</div></div>`;
-  } else {
-    m.innerHTML=`<div class="crumb">見積AI参照用ライブラリ ＞ 過去案件資料</div>${sync}
-    <table class="files"><tr><th>名前</th><th>更新日時</th></tr>
-    <tr><td>📁 2026年度</td><td>今日 0:00</td></tr><tr><td>📁 2025年度</td><td>今日 0:00</td></tr><tr><td>📁 2024年度</td><td>今日 0:00</td></tr>
-    <tr><td>📄 見積書_BR-1876.pdf</td><td>2025/11</td></tr><tr><td>📄 加工メモ_BR-1950.pdf</td><td>2026/02</td></tr></table>
-    <p style="font-size:12.5px;color:var(--sub)">過去の見積書・加工メモなどの PDF も、見積AIが根拠として参照します（CAD ファイルは PDF にして保存）。</p>`;
-  }
+function notesOf(inp,cases){
+  const n=[], maxT=Math.max(...cases.map(r=>r.t)), minT=Math.min(...cases.map(r=>r.t)), qs=cases.map(r=>r.qty);
+  if(inp.t>=maxT) n.push(`板厚 t${inp.t} は、似た案件の中で最も厚い側です。曲げの段取りと加工時間が概算より増える可能性があります。`);
+  else n.push(`板厚 t${inp.t} は、似た案件（t${minT}〜t${maxT}）の範囲内です。`);
+  if(inp.qty>Math.max(...qs)) n.push(`数量 ${inp.qty}個 は、似た案件の数量（${Math.min(...qs)}〜${Math.max(...qs)}個）より多いため、段取りは別に計算しています。`);
+  n.push("曲げの数と角度は、図面の曲げ線と注記から読み取っています。図面と照らして確認してください。");
+  n.push("材料費は受注した時期で単価が違います（2024年より2026年の案件が高め）。直近の案件に近い金額を目安にしてください。");
+  n.push("表面処理（外注）の費用は、過去案件の一覧に列がないため概算に含めていません。");
+  return n;
 }
-document.querySelectorAll(".spnav .f").forEach(x=>x.onclick=()=>showSP(x.dataset.f));
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));
-  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on", v.id==="v-"+t.dataset.v));
-  if(t.dataset.v==="sp" && !$("#spmain").innerHTML) showSP("xl");
-});
-function openViewer(){
-  $("#viewer .vc").innerHTML=drawing(NEW,true);
-  $("#viewer").hidden=false;
+const kpi=(k,v,u,r)=>`<div class="kpi"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div><div class="r">幅 ${r}</div></div>`;
+function card(inp,{cases,c}){
+  const id="c"+(++cid);
+  const rows=cases.map((r,i)=>`<tr><td><a onclick="openSP('pdf','${r.no}')"><b>${r.no}</b></a><div class="sm">${r.name}・${r.date}受注</div></td>
+    <td>${r.mat} t${r.t}<div class="sm">${r.w}×${r.h}／穴${r.holes}・曲げ${r.bends}</div></td>
+    <td class="n">${r.qty}個</td><td class="n">${f1(r.setup+r.proc)}h</td><td class="n">${r.matcost.toLocaleString("ja-JP")}円</td><td class="n">${r.design.toFixed(1)}h</td>
+    <td class="n"><span class="sc">${r.score}/${SCORE_MAX}</span></td></tr>`).join("");
+  const per=c.per.map(p=>`<tr><td>${p.no}</td><td class="n">${f1(p.setup)}h</td><td class="n">${p.unit.toFixed(3)}h</td><td class="n">${f1(p.hours)}h</td><td class="n">${fmtY(p.mat)}円</td><td class="n">${f1(p.design)}h</td></tr>`).join("");
+  return `<div class="ac" id="${id}">
+  <div class="ac-h"><div class="ac-t">概算結果</div><div class="ac-s">${inp.no} ${inp.name}　数量 ${inp.qty}個</div></div>
+  <div class="ac-b">
+    <div class="ac-l">図面から読み取った内容</div>
+    <div class="fs">${facts(inp).map(f=>`<div class="f"><span class="k">${f[0]}</span><span class="v">${f[1]}<span class="src ${f[3]?"w":""}">${f[2]}</span></span></div>`).join("")}</div>
+    <div class="ac-l">概算（数量 ${inp.qty}個）</div>
+    <div class="kp">${kpi("加工工数（段取り＋加工）",f1(c.hours[0]),"時間",`${f1(c.hours[1])}〜${f1(c.hours[2])}時間`)}${kpi("材料費",fmtY(c.mat[0]),"円",`${fmtY(c.mat[1])}〜${fmtY(c.mat[2])}円`)}${kpi("設計時間",f1(c.design[0]),"時間",`${f1(c.design[1])}〜${f1(c.design[2])}時間`)}</div>
+    <div class="ac-l">根拠にした過去案件（5件・一致度の高い順）</div>
+    <div style="overflow-x:auto"><table class="ct"><tr><th>図番</th><th>材質・形状</th><th class="n">数量</th><th class="n">実績工数</th><th class="n">材料費</th><th class="n">設計</th><th class="n">一致度</th></tr>${rows}</table></div>
+    <div class="tog" onclick="const b=this.nextElementSibling;b.hidden=!b.hidden;this.textContent=(b.hidden?'▸':'▾')+' 計算の根拠を表示'">▸ 計算の根拠を表示</div>
+    <div class="tgb" hidden>
+      <div>似た5件それぞれの実績を、今回の条件に合わせて直してから平均しています。</div>
+      <ul><li>段取り：実績の段取り時間 ＋ 曲げ1箇所の差あたり 0.35時間</li>
+        <li>1個あたり加工：実績の加工時間 ÷ 数量 ×（1 ＋ 板厚の差 × 0.08）×（外形の面積比）<sup>0.3</sup></li>
+        <li>材料費：実績の1個あたり材料費 ×（外形の面積 × 板厚の比）× 数量</li>
+        <li>設計時間：実績 ＋ 曲げ1箇所の差あたり 0.4時間</li></ul>
+      <div style="overflow-x:auto"><table class="ct"><tr><th>根拠の案件</th><th class="n">段取り</th><th class="n">1個あたり加工</th><th class="n">加工工数</th><th class="n">材料費</th><th class="n">設計</th></tr>${per}</table></div>
+      <div class="sm" style="margin-top:6px;color:var(--sub);font-size:11.5px">補正の係数は例です。実際の係数は要件定義で熟練工の方と決めます。</div>
+    </div>
+    <div class="ac-l">確認していただきたい点</div>
+    <ul class="nt">${notesOf(inp,cases).map(x=>`<li>${x}</li>`).join("")}</ul>
+    <div class="ac-f">計算：コード インタープリター（Python）で実行　参照：<a onclick="openSP('xl')">${XLNAME}</a>・<a onclick="openViewer('${NEW.no}')">${pdfName(NEW)}</a></div>
+  </div>
+  <div class="ac-a"><button onclick="const s=document.querySelector('#${id} .ac-show');s.hidden=!s.hidden">数量を変えて再計算</button><button onclick="openSP('pdf','${cases[0].no}')">いちばん近い図面を開く</button><button onclick="openSP('xl')">根拠の実績を Excel で見る</button></div>
+  <div class="ac-show" hidden><span style="font-size:13px">数量（個）</span><input type="number" min="1" value="${inp.qty}"><button class="pri" onclick="const v=+document.querySelector('#${id} .ac-show input').value; if(v>0) recalc({qty:v}, '数量 '+v+'個 で計算し直しました。')">再計算</button></div>
+  <div class="ac-d">AI で生成された内容は誤りを含む可能性があります。最終的な金額は、ご担当者・熟練工の方が確認して決めてください。</div>
+</div>`;
 }
-$("#viewer").onclick=e=>{ if(e.target.id==="viewer"||e.target.classList.contains("x")) $("#viewer").hidden=true; };
-start();
+function drawingAns(){
+  if(!cur) return route("");
+  const r=similar(cur)[0], same=r.tags.filter(t=>!t[1]).map(t=>t[0]);
+  typing(2000,()=>{
+    agentMsg(`<div class="bub"><p>いちばん近いのは <b>${r.no}</b>（${r.name}・${r.date}受注）です。${cit(1,`openSP('pdf','${r.no}')`)}</p><p>${same.join("・")}が今回の図面と一致しています。実績は次のとおりです。${cit(2,"openSP('xl')")}</p>
+      <div class="mini"><div><div class="k">数量</div><div class="v">${r.qty}個</div></div><div><div class="k">段取り</div><div class="v">${r.setup.toFixed(1)}h</div></div><div><div class="k">加工</div><div class="v">${r.proc.toFixed(1)}h</div></div><div><div class="k">材料費</div><div class="v">${r.matcost.toLocaleString("ja-JP")}円</div></div><div><div class="k">設計</div><div class="v">${r.design.toFixed(1)}h</div></div></div>
+      ${refs([{k:"pdf",name:`${r.no}.pdf`,go:`openSP('pdf','${r.no}')`},{k:"xl",name:XLNAME,go:"openSP('xl')"}])}</div>`,{ai:true});
+    afterAnswer();
+  });
+}
+function checkAns(){
+  if(!cur) return route("");
+  const {cases}=lastRun||compute(cur), maxT=Math.max(...cases.map(r=>r.t));
+  const thick=cur.t>=maxT;
+  typing(2200,()=>{
+    agentMsg(`<div class="bub"><p>今回の図面 <b>${cur.no}</b> で、熟練工の方に確認していただきたい点は次のとおりです。</p><ul>
+      <li><b>曲げ</b>：曲げ ${cur.bends}箇所・内R${cur.t} は図面の曲げ線と注記から読み取りました。${thick?"板厚が似た案件の中で最も厚い側なので、曲げの段取りが増えないか見てください。":"曲げ順と段取りが過去案件と同じでよいか見てください。"}${cit(1,`openViewer('${NEW.no}')`)}</li>
+      <li><b>穴あけ</b>：${cur.holes}-φ11 の穴は、似た案件（穴 ${Math.min(...cases.map(r=>r.holes))}〜${Math.max(...cases.map(r=>r.holes))}箇所）と同じ加工方法を前提にしています。${cit(2,"openSP('xl')")}</li>
+      <li><b>材料費</b>：過去案件は受注時期で材料単価が違います。最新の単価で見直してください。${cit(2,"openSP('xl')")}</li>
+      <li><b>表面処理</b>：${cur.surf}（外注）の費用は概算に入っていません。</li></ul>
+      ${refs([{k:"pdf",name:pdfName(NEW),go:`openViewer('${NEW.no}')`},{k:"xl",name:XLNAME,go:"openSP('xl')"}])}</div>`,{ai:true});
+    afterAnswer();
+  });
+}
+
+/* ---- Teams のファイル ビューア ---- */
+function openViewer(no){
+  const r = no===NEW.no ? NEW : DATA.find(x=>x.no===no);
+  $("#vname").textContent=pdfName(r); $("#vpage").innerHTML=dwg(r); $("#viewer").hidden=false;
+}
+function closeViewer(){ $("#viewer").hidden=true; }
+$("#viewer").addEventListener("click",e=>{ if(e.target.id==="viewer") closeViewer(); });
+
+/* ================= SharePoint ================= */
+let sp={at:"root", file:null};
+function openSP(kind,no){ sp = kind==="xl" ? {at:"xl"} : kind==="pdf" ? {at:"pdfv",file:no} : {at:kind}; show("sp"); }
+function spChrome(inner,crumb,cmd=true){
+  return `<div class="sp-app"><div class="sp-suite">${ic("waf")}<span class="nm">SharePoint</span><div class="sp-suite sr" style="background:#fff;height:32px;flex:1;max-width:460px;margin:0 auto;border-radius:4px;color:var(--sub2);display:flex;align-items:center;gap:8px;padding:0 10px;font-size:13px">${ic("srch")}このライブラリを検索</div><div class="avs" style="background:#8764b8">見積</div></div>
+  <div class="sp-head"><div class="row"><div class="sp-logo">見</div><div class="st">見積AI参照用</div></div><div class="nv"><span>ホーム</span><span class="on">ドキュメント</span><span>ページ</span><span>サイト コンテンツ</span></div></div>
+  ${cmd?`<div class="sp-cmd"><span>${ic("plus")}新規</span><span>${ic("up")}アップロード</span><span>${ic("edit")}グリッド ビューで編集</span><span>${ic("share")}共有</span><span>${ic("sync")}同期</span><span class="r">すべてのドキュメント ▾</span></div>`:""}
+  <div class="sp-main"><div class="crumb">${crumb}</div>${inner}</div></div>`;
+}
+const SYNC=`<div class="infobar">${ic("sync")}<span>このフォルダは、QNAP の「AI連携フォルダ」から HBS 3 で毎晩 22:00 に同期しています（設定の例）。最終同期：今日 0:00</span></div>`;
+function renderSP(){
+  const v=$("#v-sp");
+  if(sp.at==="xl"){ v.innerHTML=excelView(); return; }
+  if(sp.at==="pdfv"){ const r=DATA.find(x=>x.no===sp.file)||NEW;
+    v.innerHTML=`<div class="pdf-app"><div class="pdf-top"><button class="bk" onclick="sp={at:'pdf'};renderSP()">← 戻る</button><div class="fic pdf">PDF</div><b>${pdfName(r)}</b><span class="r">1 / 1 ページ　｜　見積AI参照用 ＞ ドキュメント ＞ AI連携フォルダ ＞ 図面PDF</span></div><div class="pdf-body"><div class="page">${dwg(r)}</div></div></div>`; return; }
+  const c0=`<a onclick="sp={at:'root'};renderSP()">ドキュメント</a><span class="sep">›</span>`;
+  if(sp.at==="root"){
+    v.innerHTML=spChrome(`${SYNC}<table class="fl"><tr><th>名前</th><th>更新日時</th><th>更新者</th><th>ファイル数</th></tr>
+      <tr class="cl" onclick="sp={at:'pdf'};renderSP()"><td><div class="nmc"><div class="fold"></div>図面PDF</div></td><td>今日 0:00</td><td>QNAP 同期</td><td>${DATA.length}</td></tr>
+      <tr class="cl" onclick="sp={at:'techs'};renderSP()"><td><div class="nmc"><div class="fold"></div>TECHS出力</div></td><td>今日 0:00</td><td>QNAP 同期</td><td>1</td></tr></table>`, `${c0}<span>AI連携フォルダ</span>`); return; }
+  if(sp.at==="techs"){
+    v.innerHTML=spChrome(`${SYNC}<table class="fl"><tr><th>名前</th><th>更新日時</th><th>更新者</th><th>サイズ</th></tr>
+      <tr class="cl" onclick="sp={at:'xl'};renderSP()"><td><div class="nmc"><div class="fic xl">XLS</div>${XLNAME}</div></td><td>今日 0:00</td><td>QNAP 同期</td><td>48.2 KB</td></tr></table>`,
+      `${c0}<a onclick="sp={at:'root'};renderSP()">AI連携フォルダ</a><span class="sep">›</span><span>TECHS出力</span>`); return; }
+  if(sp.at==="pdf"){
+    const list=[...DATA].sort((a,b)=>b.date.localeCompare(a.date));
+    v.innerHTML=spChrome(`${SYNC}<table class="fl"><tr><th>名前</th><th>更新日時</th><th>更新者</th><th>サイズ</th></tr>${list.map((r,i)=>`<tr class="cl" onclick="sp={at:'pdfv',file:'${r.no}'};renderSP()"><td><div class="nmc"><div class="fic pdf">PDF</div>${r.no}.pdf</div></td><td>${r.date.replace("/","年")}月</td><td>QNAP 同期</td><td>${150+((i*37)%90)} KB</td></tr>`).join("")}</table>`,
+      `${c0}<a onclick="sp={at:'root'};renderSP()">AI連携フォルダ</a><span class="sep">›</span><span>図面PDF</span>`); return; }
+}
+function excelView(){
+  const hl=lastRun?lastRun.cases.map(r=>r.no):[];
+  const cols=["図番","品名","材質","板厚","幅","高さ","穴数","曲げ数","表面処理","数量","段取り(h)","加工(h)","材料費(円)","設計(h)","受注月","得意先"];
+  const keys=["no","name","mat","t","w","h","holes","bends","surf","qty","setup","proc","matcost","design","date","cust"];
+  const num=new Set(["t","w","h","holes","bends","qty","setup","proc","matcost","design"]);
+  const L="ABCDEFGHIJKLMNOP";
+  let h=`<tr><th></th>${cols.map((_,i)=>`<th>${L[i]}</th>`).join("")}</tr><tr class="hd"><td class="rn">1</td>${cols.map(c=>`<td>${c} ▾</td>`).join("")}</tr>`;
+  DATA.forEach((r,i)=>{ h+=`<tr class="${hl.includes(r.no)?"hl":""}"><td class="rn">${i+2}</td>${keys.map(k=>`<td class="${num.has(k)?"n":""}">${k==="matcost"?r[k].toLocaleString("ja-JP"):r[k]}</td>`).join("")}</tr>`; });
+  return `<div class="xl-app"><div class="xl-top">${ic("waf")}<b>Excel</b><span class="nm">${XLNAME} ・ 保存済み</span><button class="bk" onclick="sp={at:'techs'};renderSP()">← SharePoint に戻る</button></div>
+    <div class="xl-rb"><span>ファイル</span><span class="on">ホーム</span><span>挿入</span><span>描画</span><span>ページ レイアウト</span><span>数式</span><span>データ</span><span>校閲</span><span>表示</span></div>
+    <div class="xl-fx"><span class="nb">A1</span><span>fx</span><span class="fx">図番</span></div>
+    ${hl.length?`<div style="padding:6px 12px;font-size:12.5px;background:#fff4ce;border-bottom:1px solid #f0e0a0">黄色の行が、直前の概算で根拠にした5件です。</div>`:""}
+    <div class="xl-grid"><table class="xg">${h}</table></div>
+    <div class="xl-tabs"><span>実績</span></div></div>`;
+}
+
+/* ================= Copilot Studio のアクティビティ ================= */
+function pyCode(inp){
+  return `import pandas as pd
+
+df = pd.read_excel("${XLNAME}", sheet_name="実績")
+q = {"品名": "${inp.name}", "材質": "${inp.mat}", "板厚": ${inp.t}, "幅": ${inp.w}, "高さ": ${inp.h},
+     "穴数": ${inp.holes}, "曲げ数": ${inp.bends}, "表面処理": "${inp.surf}", "数量": ${inp.qty}}
+
+df = df[df["材質"] == q["材質"]].copy()
+
+def score(r):
+    s = 3 * (r["品名"] == q["品名"]) + 2
+    d = abs(r["板厚"] - q["板厚"])
+    s += 3 if d == 0 else 2 if d <= 1.5 else 1 if d <= 3 else 0
+    s += r["曲げ数"] == q["曲げ数"]
+    s += abs(r["穴数"] - q["穴数"]) <= 2
+    s += 0.7 < (r["幅"] * r["高さ"]) / (q["幅"] * q["高さ"]) < 1.3
+    s += r["表面処理"] == q["表面処理"]
+    return s
+
+df["一致度"] = df.apply(score, axis=1)
+top = df.sort_values(["一致度", "受注月"], ascending=False).head(5)
+
+area = lambda w, h: w * h / 1e6
+a_q = area(q["幅"], q["高さ"])
+rows = []
+for _, r in top.iterrows():
+    a_r = area(r["幅"], r["高さ"])
+    setup = r["段取り(h)"] + 0.35 * (q["曲げ数"] - r["曲げ数"])
+    unit = r["加工(h)"] / r["数量"] * (1 + 0.08 * (q["板厚"] - r["板厚"])) * (a_q / a_r) ** 0.3
+    mat = r["材料費(円)"] / r["数量"] / (a_r * r["板厚"]) * (a_q * q["板厚"]) * q["数量"]
+    design = r["設計(h)"] + 0.4 * (q["曲げ数"] - r["曲げ数"])
+    rows.append({"図番": r["図番"], "加工工数": setup + unit * q["数量"], "材料費": mat, "設計時間": design})
+
+est = pd.DataFrame(rows)
+result = {k: [est[k].mean(), est[k].min(), est[k].max()] for k in ["加工工数", "材料費", "設計時間"]}`;
+}
+function renderAct(){
+  const box=$("#act");
+  if(!lastRun){ box.innerHTML=`<div class="empty">まだ実行の記録がありません。<br>① Teams で図面を添付して送ると、ここに記録が出ます。</div>`; return; }
+  const {inp,cases,c}=lastRun;
+  const read={図番:inp.no,品名:inp.name,材質:inp.mat,板厚:inp.t,展開寸法:{幅:inp.w,高さ:inp.h},穴:{数:inp.holes,径:"φ11"},曲げ:{数:inp.bends,角度:90,内R:inp.t,確からしさ:"要確認"},表面処理:inp.surf};
+  const out={似た案件:cases.map(r=>({図番:r.no,一致度:`${r.score}/${SCORE_MAX}`})),概算:{数量:inp.qty,加工工数_時間:[+f1(c.hours[0]),+f1(c.hours[1]),+f1(c.hours[2])],材料費_円:[yen(c.mat[0]),yen(c.mat[1]),yen(c.mat[2])],設計時間_時間:[+f1(c.design[0]),+f1(c.design[1]),+f1(c.design[2])]}};
+  const J=o=>`<pre class="js">${esc(JSON.stringify(o,null,2))}</pre>`;
+  const st=(title,ty,body,open)=>`<div class="st"><details ${open?"open":""}><summary><b>${title}</b><span class="ty">${ty}</span><span class="ok">✓ 完了</span></summary><div class="bd">${body}</div></details></div>`;
+  box.innerHTML=`<div class="act">
+    ${st("ユーザーの入力","メッセージ",`<div>${inp.qty===NEW.qty&&inp.t===NEW.t?"この図面の概算をお願いします。数量は20個、表面処理は三価クロメートです。":"条件を変えて再計算（数量 "+inp.qty+"個・板厚 t"+inp.t+"）"}</div><div style="margin-top:4px">添付：${pdfName(NEW)}（182 KB）</div>`)}
+    ${st("概算を作成","トピック",`<div>図面の受け取りをきっかけに開始。下の3つのツールを順に呼び出し、結果をカードで返します。</div>`)}
+    ${st("図面の読み取り","プロンプト",`<div>入力：${pdfName(NEW)}</div><div style="margin-top:4px">出力（JSON）</div>${J(read)}`)}
+    ${st("過去案件一覧の取得","コネクタ",`<div>SharePoint：ファイル コンテンツの取得</div><div style="margin-top:4px">出力：${XLNAME}（シート「実績」・${DATA.length}行）</div>`)}
+    ${st("類似案件の検索と概算","プロンプト＋コード インタープリター",`<div>入力：${XLNAME}・読み取り結果・数量 ${inp.qty}個</div><div style="margin-top:4px">出力（JSON）</div>${J(out)}<details style="margin-top:6px"><summary style="padding:4px 0;font-size:12px;color:var(--cs)">生成された Python コードの例</summary><pre class="js">${esc(pyCode(inp))}</pre></details>`,true)}
+    ${st("概算結果を送信","メッセージ（アダプティブ カード）",`<div>カード「概算結果」：読み取り内容・概算（幅つき）・根拠の5件・確認点</div>`)}
+  </div>`;
+}
+
+/* ================= 画面の切り替え ================= */
+function show(v){
+  document.querySelectorAll(".demobar .tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+  if(v==="sp") renderSP();
+}
+document.querySelectorAll(".demobar .tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="sp" && sp.at==="pdfv") sp={at:"root"}; show(b.dataset.v); });
+function resetDemo(){ sp={at:"root"}; closeViewer(); show("teams"); start(); }
+chrome(); start();
 </script>
 </body>
 </html>
