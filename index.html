@@ -131,6 +131,15 @@ table.xl tr.hl td{background:#fff7d6}
   .tabs .tab{padding:4px 8px;font-size:12px}
   .top .sub{display:none}
 }
+.att.open{cursor:pointer} .att.open:hover{border-color:var(--brand)}
+.att .op{font-size:11.5px;color:var(--brand-d);margin-left:6px}
+.viewer{position:fixed;inset:0;background:rgba(20,22,28,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.viewer[hidden]{display:none}
+.viewer .vb{background:#fff;border-radius:10px;max-width:640px;width:100%;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.viewer .vh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600}
+.viewer .vh .x{margin-left:auto;cursor:pointer;border:0;background:none;font-size:18px;color:var(--sub)}
+.viewer .vc{padding:14px;overflow:auto}
+.viewer .vc svg{max-width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -213,12 +222,15 @@ table.xl tr.hl td{background:#fff7d6}
         <li>図面の「形」そのもので似た図面を探すことはしません（文字と数値の条件で探します）</li>
         <li>最終的な見積金額は、熟練工の方・ご担当者が確認して決めます</li>
         <li>精度は TECHS に残っている実績の範囲で決まります（要件定義で確認）</li>
+        <li>図面から読み取れる項目と精度は、御社の実際の図面で確かめます（品名・材質などの文字は読みやすく、穴や曲げの数は図面の描き方によります）</li>
+        <li>実際の画面は Teams の標準の表示（文章・表・カード）になり、このデモとは見た目が異なります</li>
         <li>見積書の自動作成・NIコラボ連携は次の段階です</li>
       </ul></div>
     </div>
   </div></div>
 </section>
 
+<div id="viewer" class="viewer" hidden><div class="vb"><div class="vh">📄 NB-3120_取付ブラケット.pdf<button class="x" aria-label="閉じる">×</button></div><div class="vc"></div></div></div>
 <script>
 const DATA = [{"no": "BP-2045", "name": "ベースプレート", "mat": "SS400", "t": 6, "w": 280, "h": 200, "holes": 6, "bends": 0, "surf": "三価クロメート", "qty": 30, "setup": 1.4, "proc": 8.6, "matcost": 16050, "design": 1.5, "date": "2026/06", "cust": "B社"}, {"no": "BR-2012", "name": "取付ブラケット", "mat": "SUS304", "t": 3.2, "w": 250, "h": 160, "holes": 6, "bends": 2, "surf": "なし", "qty": 40, "setup": 2.1, "proc": 14.4, "matcost": 27400, "design": 2.5, "date": "2026/05", "cust": "A社"}, {"no": "ST-1988", "name": "ステー", "mat": "SUS304", "t": 4, "w": 220, "h": 40, "holes": 2, "bends": 1, "surf": "なし", "qty": 80, "setup": 2.1, "proc": 13.6, "matcost": 15400, "design": 2.0, "date": "2026/03", "cust": "C社"}, {"no": "BR-1950", "name": "取付ブラケット", "mat": "SS400", "t": 6, "w": 320, "h": 220, "holes": 10, "bends": 2, "surf": "塗装", "qty": 15, "setup": 1.9, "proc": 6.9, "matcost": 9910, "design": 2.5, "date": "2026/02", "cust": "C社"}, {"no": "ST-1940", "name": "ステー", "mat": "A5052", "t": 3, "w": 200, "h": 35, "holes": 2, "bends": 1, "surf": "アルマイト", "qty": 120, "setup": 1.9, "proc": 15.5, "matcost": 6370, "design": 2.0, "date": "2026/02", "cust": "F社"}, {"no": "BP-1915", "name": "ベースプレート", "mat": "SUS304", "t": 6, "w": 300, "h": 300, "holes": 4, "bends": 0, "surf": "なし", "qty": 8, "setup": 1.6, "proc": 2.6, "matcost": 23380, "design": 1.5, "date": "2026/01", "cust": "D社"}, {"no": "LK-1902", "name": "L金具", "mat": "SUS304", "t": 3, "w": 160, "h": 120, "holes": 4, "bends": 1, "surf": "なし", "qty": 60, "setup": 2.1, "proc": 13.5, "matcost": 18570, "design": 1.5, "date": "2026/01", "cust": "B社"}, {"no": "BR-1876", "name": "取付ブラケット", "mat": "SS400", "t": 6, "w": 280, "h": 190, "holes": 8, "bends": 2, "surf": "三価クロメート", "qty": 20, "setup": 2.0, "proc": 8.0, "matcost": 9800, "design": 3.0, "date": "2025/11", "cust": "D社"}, {"no": "CV-1861", "name": "カバー", "mat": "SUS304", "t": 1.5, "w": 350, "h": 220, "holes": 8, "bends": 4, "surf": "なし", "qty": 30, "setup": 3.2, "proc": 18.1, "matcost": 17500, "design": 3.5, "date": "2025/10", "cust": "C社"}, {"no": "FL-1823", "name": "フランジ", "mat": "SUS304", "t": 6, "w": 200, "h": 200, "holes": 6, "bends": 0, "surf": "なし", "qty": 20, "setup": 1.5, "proc": 6.0, "matcost": 24700, "design": 2.0, "date": "2025/10", "cust": "E社"}, {"no": "LK-1804", "name": "L金具", "mat": "SS400", "t": 4.5, "w": 180, "h": 120, "holes": 4, "bends": 1, "surf": "塗装", "qty": 80, "setup": 1.6, "proc": 16.0, "matcost": 11690, "design": 2.0, "date": "2025/09", "cust": "A社"}, {"no": "CV-1777", "name": "カバー", "mat": "A5052", "t": 2, "w": 400, "h": 250, "holes": 10, "bends": 4, "surf": "アルマイト", "qty": 25, "setup": 2.9, "proc": 16.8, "matcost": 12680, "design": 4.0, "date": "2025/08", "cust": "A社"}, {"no": "CV-1759", "name": "カバー", "mat": "SS400", "t": 3.2, "w": 380, "h": 260, "holes": 8, "bends": 3, "surf": "塗装", "qty": 15, "setup": 2.4, "proc": 7.7, "matcost": 7170, "design": 3.0, "date": "2025/08", "cust": "A社"}, {"no": "ST-1739", "name": "ステー", "mat": "SS400", "t": 6, "w": 300, "h": 50, "holes": 3, "bends": 2, "surf": "三価クロメート", "qty": 60, "setup": 1.9, "proc": 13.3, "matcost": 8560, "design": 2.5, "date": "2025/07", "cust": "F社"}, {"no": "BR-1712", "name": "取付ブラケット", "mat": "SS400", "t": 4.5, "w": 300, "h": 200, "holes": 6, "bends": 2, "surf": "三価クロメート", "qty": 30, "setup": 1.8, "proc": 11.9, "matcost": 11540, "design": 2.5, "date": "2025/06", "cust": "F社"}, {"no": "BP-1690", "name": "ベースプレート", "mat": "SS400", "t": 9, "w": 350, "h": 250, "holes": 6, "bends": 0, "surf": "三価クロメート", "qty": 12, "setup": 1.5, "proc": 4.1, "matcost": 13590, "design": 2.0, "date": "2025/05", "cust": "B社"}, {"no": "BR-1655", "name": "取付ブラケット", "mat": "A5052", "t": 5, "w": 240, "h": 160, "holes": 6, "bends": 2, "surf": "アルマイト", "qty": 20, "setup": 2.1, "proc": 6.3, "matcost": 9670, "design": 2.5, "date": "2025/04", "cust": "B社"}, {"no": "BR-1633", "name": "取付ブラケット", "mat": "SS400", "t": 9, "w": 260, "h": 180, "holes": 8, "bends": 2, "surf": "三価クロメート", "qty": 10, "setup": 1.8, "proc": 4.7, "matcost": 6310, "design": 2.5, "date": "2025/03", "cust": "E社"}, {"no": "BR-1611", "name": "取付ブラケット", "mat": "SS400", "t": 6, "w": 300, "h": 200, "holes": 8, "bends": 3, "surf": "塗装", "qty": 25, "setup": 2.2, "proc": 12.4, "matcost": 13260, "design": 3.0, "date": "2025/02", "cust": "E社"}, {"no": "LK-1588", "name": "L金具", "mat": "SS400", "t": 6, "w": 200, "h": 150, "holes": 4, "bends": 1, "surf": "三価クロメート", "qty": 50, "setup": 1.7, "proc": 11.5, "matcost": 12070, "design": 2.0, "date": "2024/12", "cust": "B社"}, {"no": "ST-1544", "name": "ステー", "mat": "SS400", "t": 4.5, "w": 250, "h": 40, "holes": 2, "bends": 1, "surf": "三価クロメート", "qty": 100, "setup": 1.8, "proc": 14.4, "matcost": 6480, "design": 1.5, "date": "2024/11", "cust": "D社"}, {"no": "CV-1502", "name": "カバー", "mat": "SS400", "t": 2.3, "w": 450, "h": 300, "holes": 12, "bends": 4, "surf": "塗装", "qty": 20, "setup": 2.8, "proc": 14.8, "matcost": 8230, "design": 3.5, "date": "2024/10", "cust": "A社"}, {"no": "FL-1466", "name": "フランジ", "mat": "SS400", "t": 9, "w": 250, "h": 250, "holes": 8, "bends": 0, "surf": "塗装", "qty": 15, "setup": 1.5, "proc": 5.1, "matcost": 11860, "design": 1.5, "date": "2024/09", "cust": "E社"}, {"no": "BP-1421", "name": "ベースプレート", "mat": "SS400", "t": 12, "w": 400, "h": 300, "holes": 8, "bends": 0, "surf": "塗装", "qty": 10, "setup": 1.4, "proc": 4.5, "matcost": 19460, "design": 1.5, "date": "2024/08", "cust": "F社"}];
 const NEW = {no:"NB-3120", name:"取付ブラケット", mat:"SS400", t:6, w:300, h:200, holes:8, bends:2, surf:"三価クロメート", qty:20};
@@ -356,8 +368,7 @@ function step1(){
   cur={...NEW};
   $("#sugg").innerHTML="";
   add(`この図面の概算をお願いします。数量は ${cur.qty}個、表面処理は三価クロメートです。
-  <div class="att"><div class="fi">PDF</div><div><div class="fn">NB-3120_取付ブラケット.pdf</div><div class="fs">PDF・1ページ・182 KB</div></div></div>
-  <div class="sec">${drawing(cur,false)}</div>`, true);
+  <div class="att open" onclick="openViewer()"><div class="fi">PDF</div><div><div class="fn">NB-3120_取付ブラケット.pdf</div><div class="fs">PDF・1ページ・182 KB<span class="op">クリックで開く</span></div></div></div>`, true);
   thinking(["図面を読み取っています（品名・材質・寸法・加工）","SharePoint の過去案件から似た案件を探しています","実績から概算を計算しています"], ()=>{
     add(answer(cur));
     nextSugg();
@@ -387,7 +398,7 @@ function followDrawing(){
   const r=similar(cur)[0];
   thinking(["SharePoint から図面を探しています"], ()=>{
     add(`いちばん近いのは <b>${r.no}（${r.name}・${r.date}受注）</b> です。<span class="cite">2</span>
-    <div class="sec">${drawing(r,true)}</div>
+    <div class="att open" onclick="openSP('pdf','${r.no}')"><div class="fi">PDF</div><div><div class="fn">${r.no}.pdf</div><div class="fs">SharePoint・見積AI参照用ライブラリ ＞ 図面PDF<span class="op">クリックで開く</span></div></div></div>
     <div class="sec"><div class="facts">
       <div class="fact"><div class="k">数量</div><div class="v">${r.qty}個</div></div>
       <div class="fact"><div class="k">段取り</div><div class="v">${r.setup.toFixed(1)}h</div></div>
@@ -457,6 +468,11 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on", v.id==="v-"+t.dataset.v));
   if(t.dataset.v==="sp" && !$("#spmain").innerHTML) showSP("xl");
 });
+function openViewer(){
+  $("#viewer .vc").innerHTML=drawing(NEW,true);
+  $("#viewer").hidden=false;
+}
+$("#viewer").onclick=e=>{ if(e.target.id==="viewer"||e.target.classList.contains("x")) $("#viewer").hidden=true; };
 start();
 </script>
 </body>
